@@ -597,23 +597,62 @@ ionic.views.Scroll = ionic.views.View.inherit({
     //Broadcasted when keyboard is shown on some platforms.
     //See js/utils/keyboard.js
     container.addEventListener('scrollChildIntoView', function(e) {
+      var keyboardHeight = e.detail.keyboardHeight || 0;
       var deviceHeight = window.innerHeight;
+      
+      var frameHeight;
+      if (parseFloat(device.version) >= 7.0){
+        frameHeight = deviceHeight;
+      }
+      else {
+        frameHeight = deviceHeight - keyboardHeight;
+      }
+      
       var element = e.target;
-      var elementHeight = e.target.offsetHeight;
 
       //getBoundingClientRect() will actually give us position relative to the viewport
-      var elementDeviceTop = element.getBoundingClientRect().top;
-      var elementScrollTop = ionic.DomUtil.getPositionInParent(element, container).top;
-
+      var elementDeviceBottom = element.getBoundingClientRect().bottom;
+      
+      if (e.detail.firstKeyboardShow){
+        //shrink scrollview so we can actually scroll if the input is hidden
+        //if it isn't shrink so we can scroll to inputs under the keyboard
+        container.style.height = (container.clientHeight - keyboardHeight) + "px";
+        
+        //update scroll view
+        self.resize();
+      }
+        
       //If the element is positioned under the keyboard...
-      if (elementDeviceTop + elementHeight > deviceHeight) {
+      if (elementDeviceBottom > frameHeight) {
         //Put element in middle of visible screen
-        self.scrollTo(0, elementScrollTop + elementHeight - (deviceHeight * 0.5), true);
+        //Wait for resize() to reset scroll position
+        setTimeout(function(){
+          //distance from bottom of input to the top of the keyboard
+          var keyboardTopOffset = elementDeviceBottom - frameHeight;
+          //middle of the scrollview, where we want to scroll to
+          var scrollViewMidpointOffset = container.clientHeight * 0.5;
+          var scrollOffset = keyboardTopOffset + scrollViewMidpointOffset;
+          self.scrollBy(0, scrollOffset, true);
+          
+          //please someone tell me there's a better way to do this
+          //wait until input is scrolled into view, then fix focus
+          setTimeout(function(){
+            element.value = element.value; //thanks @adambradley 1337h4x
+          }, 600);
+        }, 32);
       }
 
       //Only the first scrollView parent of the element that broadcasted this event
       //(the active element that needs to be shown) should receive this event
       e.stopPropagation();
+    });
+                                              
+    container.addEventListener('resetScrollView', function(e) {
+      //return scrollview to original height once keyboard has hidden
+      container.style.height = "";
+      setTimeout(function(){
+        self.resize();
+      }, 48)
     });
 
     if ('ontouchstart' in window) {
