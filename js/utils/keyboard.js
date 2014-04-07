@@ -1,8 +1,11 @@
 (function(ionic) {
 
 ionic.Platform.ready(function() {
-  if (ionic.Platform.is('android')) {
+  if (ionic.Platform.isAndroid()) {
     androidKeyboardFix();
+  }
+  else if (ionic.Platform.isIOS()) {
+    iOSKeyboardFix();
   }
 });
 
@@ -10,6 +13,7 @@ function androidKeyboardFix() {
   var rememberedDeviceWidth = window.innerWidth;
   var rememberedDeviceHeight = window.innerHeight;
   var keyboardHeight;
+ 
 
   window.addEventListener('resize', resize);
 
@@ -45,6 +49,49 @@ function androidKeyboardFix() {
       }
 
     }
+  }
+}
+ 
+function iOSKeyboardFix(){
+  var rememberedActiveEl;
+  var alreadyOpen = false;
+ 
+  window.addEventListener('focusin', fixScrollTop);
+  window.addEventListener('ionic.showkeyboard', resizeOnKeyboardShow);
+  window.addEventListener('ionic.hidekeyboard', resizeOnKeyboardHide);
+ 
+  function fixScrollTop(e){
+    if (e.srcElement.tagName === 'INPUT'){
+      document.body.scrollTop = 0;
+    }
+  }
+ 
+  function resizeOnKeyboardShow(e){
+    rememberedActiveEl = document.activeElement;
+    if (rememberedActiveEl) {
+      //This event is caught by the nearest parent scrollView
+      //of the activeElement
+      if (Keyboard.isVisible){
+        ionic.trigger('scrollChildIntoView', {
+          keyboardHeight: e.keyboardHeight,
+          target: rememberedActiveEl,
+          firstKeyboardShow: !alreadyOpen
+        }, true);
+        if (!alreadyOpen) alreadyOpen = true;
+      }
+    }
+  }
+     
+  function resizeOnKeyboardHide(){
+    //wait to see if we're just switching inputs
+    setTimeout(function(){
+      if (!Keyboard.isVisible){
+        alreadyOpen = false;
+        ionic.trigger('resetScrollView', {
+          target: rememberedActiveEl
+        }, true);
+      }
+    }, 100);
   }
 }
 
