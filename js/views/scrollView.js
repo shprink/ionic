@@ -627,8 +627,8 @@ ionic.views.Scroll = ionic.views.View.inherit({
         //Put element in middle of visible screen
         //Wait for resize() to reset scroll position
         setTimeout(function(){
-          //distance from bottom of input to the top of the keyboard
-          var keyboardTopOffset = elementDeviceBottom - frameHeight;
+          //distance from top of input to the top of the keyboard
+          var keyboardTopOffset = element.getBoundingClientRect().top - frameHeight;
           //middle of the scrollview, where we want to scroll to
           var scrollViewMidpointOffset = container.clientHeight * 0.5;
           var scrollOffset = keyboardTopOffset + scrollViewMidpointOffset;
