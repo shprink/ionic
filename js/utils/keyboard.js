@@ -64,7 +64,7 @@ function iOSKeyboardFix(){
   }
  
   function fixScrollTop(e){
-    if (e.srcElement.tagName == 'INPUT' || e.srcElement.tagName == 'TEXTAREA' || e.srcElement.isContenteditable){
+    if (e.srcElement.tagName == 'INPUT' || e.srcElement.tagName == 'TEXTAREA' || e.srcElement.isContentEditable){
       //setTimeout(function(){
         document.body.scrollTop = 0;
       //});
