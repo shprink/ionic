@@ -56,13 +56,18 @@ function iOSKeyboardFix(){
   var rememberedActiveEl;
   var alreadyOpen = false;
  
-  window.addEventListener('focusin', fixScrollTop);
-  window.addEventListener('ionic.showkeyboard', resizeOnKeyboardShow);
-  window.addEventListener('ionic.hidekeyboard', resizeOnKeyboardHide);
+  //for now
+  if (ionic.Platform.WebView()){
+    window.addEventListener('focusin', fixScrollTop);
+    window.addEventListener('ionic.showkeyboard', resizeOnKeyboardShow);
+    window.addEventListener('ionic.hidekeyboard', resizeOnKeyboardHide);
+  }
  
   function fixScrollTop(e){
     if (e.srcElement.tagName === 'INPUT'){
-      document.body.scrollTop = 0;
+      //setTimeout(function(){
+        document.body.scrollTop = 0;
+      //});
     }
   }
  
