@@ -57,7 +57,7 @@ function iOSKeyboardFix(){
   var alreadyOpen = false;
  
   //for now
-  if (ionic.Platform.isWebView()){
+  if (ionic.Platform.isWebView() && cordova.plugins.Keyboard){
     window.addEventListener('focusin', fixScrollTop);
     window.addEventListener('native.showkeyboard', resizeOnKeyboardShow);
     window.addEventListener('native.hidekeyboard', resizeOnKeyboardHide);
@@ -77,6 +77,7 @@ function iOSKeyboardFix(){
       //This event is caught by the nearest parent scrollView
       //of the activeElement
       if (cordova.plugins.Keyboard.isVisible){
+        document.body.classList.add('footer-hide');
         ionic.trigger('scrollChildIntoView', {
           keyboardHeight: e.keyboardHeight,
           target: rememberedActiveEl,
@@ -91,6 +92,7 @@ function iOSKeyboardFix(){
     //wait to see if we're just switching inputs
     setTimeout(function(){
       if (!cordova.plugins.Keyboard.isVisible){
+        document.body.classList.remove('footer-hide');
         alreadyOpen = false;
         ionic.trigger('resetScrollView', {
           target: rememberedActiveEl
