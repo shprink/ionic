@@ -57,7 +57,7 @@ function iOSKeyboardFix(){
   var alreadyOpen = false;
  
   //for now
-  if (ionic.Platform.WebView()){
+  if (ionic.Platform.isWebView()){
     window.addEventListener('focusin', fixScrollTop);
     window.addEventListener('ionic.showkeyboard', resizeOnKeyboardShow);
     window.addEventListener('ionic.hidekeyboard', resizeOnKeyboardHide);
