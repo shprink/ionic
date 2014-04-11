@@ -57,7 +57,7 @@ function iOSKeyboardFix(){
   var alreadyOpen = false;
  
   //for now
-  if (ionic.Platform.isWebView() && cordova.plugins.Keyboard){
+  if (ionic.Platform.isWebView() && cordova && cordova.plugins && cordova.plugins.Keyboard){
     window.addEventListener('focusin', fixScrollTop);
     window.addEventListener('native.showkeyboard', resizeOnKeyboardShow);
     window.addEventListener('native.hidekeyboard', resizeOnKeyboardHide);
