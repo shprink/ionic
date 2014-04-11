@@ -238,6 +238,10 @@ function($scope, scrollViewOptions, $timeout, $window, $$scrollValueCache, $loca
   });
 
   $element.on('scroll', function(e) {
+    //if good guy browser scrolls to bring partially hidden inputs into view
+    //or keyboard screws the layout up, keep scroll container in proper position
+    if (this.scrollTop != 0) this.scrollTop = 0;
+    
     var detail = (e.originalEvent || e).detail || {};
     $scope.$onScroll && $scope.$onScroll({
       event: e,
