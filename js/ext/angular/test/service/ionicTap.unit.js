@@ -59,190 +59,112 @@ describe('Ionic Tap', function() {
   */
 
   it('Should trigger a labels child inputs click, but stop the labels end event', function() {
-    var startEvent = {
+    var e = {
       type: 'touchstart',
       target: {
         tagName: 'LABEL',
-        dispatchEvent: function() { startEvent.target.dispatchedEvent = true },
-        focus: function() { startEvent.target.focused = true },
+        dispatchEvent: function() { e.target.dispatchedEvent = true },
+        focus: function() { e.target.focused = true },
         control: {
           tagName: 'INPUT',
-          dispatchEvent: function() { startEvent.target.control.dispatchedEvent = true },
-          focus: function() { startEvent.target.control.focused = true },
+          dispatchEvent: function() { e.target.control.dispatchedEvent = true },
+          focus: function() { e.target.control.focused = true },
         }
       },
-      stopPropagation: function() { endEvent.stoppedPropagation = true },
-      preventDefault: function() { endEvent.preventedDefault = true }
-    };
-    var endEvent = {
-      type: 'touchend',
-      target: {
-        tagName: 'LABEL',
-        dispatchEvent: function() { startEvent.target.dispatchedEvent = true },
-        focus: function() { startEvent.target.focused = true },
-        control: {
-          tagName: 'INPUT',
-          dispatchEvent: function() { startEvent.target.control.dispatchedEvent = true },
-          focus: function() { startEvent.target.control.focused = true },
-        }
-      },
-      stopPropagation: function() { endEvent.stoppedPropagation = true },
-      preventDefault: function() { endEvent.preventedDefault = true }
+      stopPropagation: function() { e.stoppedPropagation = true },
+      preventDefault: function() { e.preventedDefault = true }
     };
 
-    tapClick(startEvent, endEvent);
+    tapClick(e);
 
-    expect( startEvent.target.dispatchedEvent ).toBeUndefined();
-    expect( startEvent.target.focused ).toBeUndefined();
+    expect( e.target.dispatchedEvent ).toBeUndefined();
+    expect( e.target.focused ).toBeUndefined();
 
-    expect( startEvent.target.control.dispatchedEvent ).toBeDefined();
-    expect( startEvent.target.control.focused ).toBeDefined();
+    expect( e.target.control.dispatchedEvent ).toBeDefined();
+    expect( e.target.control.focused ).toBeDefined();
 
-    expect( endEvent.stoppedPropagation ).toBeUndefined();
-    expect( endEvent.preventedDefault ).toBeDefined();
+    expect( e.stoppedPropagation ).toBeUndefined();
+    expect( e.preventedDefault ).toBeDefined();
   });
 
   it('Should trigger a click for an element w/out a wrapping label', function() {
-    var startEvent = {
+    var e = {
       type: 'touchstart',
       target: {
         tagName: 'INPUT',
-        dispatchEvent: function() { startEvent.target.dispatchedEvent = true },
-        focus: function() { startEvent.target.focused = true },
+        dispatchEvent: function() { e.target.dispatchedEvent = true },
+        focus: function() { e.target.focused = true },
       },
-      stopPropagation: function() { endEvent.stoppedPropagation = true },
-      preventDefault: function() { endEvent.preventedDefault = true }
-    };
-    var endEvent = {
-      type: 'touchend',
-      target: {
-        tagName: 'INPUT',
-        dispatchEvent: function() { startEvent.target.dispatchedEvent = true },
-        focus: function() { startEvent.target.focused = true },
-      },
-      stopPropagation: function() { endEvent.stoppedPropagation = true },
-      preventDefault: function() { endEvent.preventedDefault = true }
+      stopPropagation: function() { e.stoppedPropagation = true },
+      preventDefault: function() { e.preventedDefault = true }
     };
 
-    tapClick(startEvent, endEvent);
+    tapClick(e);
 
-    expect( startEvent.target.dispatchedEvent ).toBeDefined();
-    expect( startEvent.target.focused ).toBeDefined();
+    expect( e.target.dispatchedEvent ).toBeDefined();
+    expect( e.target.focused ).toBeDefined();
 
-    expect( endEvent.stoppedPropagation ).toBeUndefined();
-    expect( endEvent.preventedDefault ).toBeUndefined();
+    expect( e.stoppedPropagation ).toBeUndefined();
+    expect( e.preventedDefault ).toBeUndefined();
 
   });
 
   it('Should not trigger a click if tapPointerMoved has moved', function() {
-    var startEvent = {
+    var e = {
       type: 'touchstart',
       target: {
         tagName: 'INPUT',
-        dispatchEvent: function() { startEvent.target.dispatchedEvent = true },
-        focus: function() { startEvent.target.focused = true },
+        dispatchEvent: function() { e.target.dispatchedEvent = true },
+        focus: function() { e.target.focused = true },
       },
-      stopPropagation: function() { endEvent.stoppedPropagation = true },
-      preventDefault: function() { endEvent.preventedDefault = true }
-    };
-    var endEvent = {
-      type: 'touchend',
-      target: {
-        tagName: 'INPUT',
-        dispatchEvent: function() { startEvent.target.dispatchedEvent = true },
-        focus: function() { startEvent.target.focused = true },
-      },
-      stopPropagation: function() { endEvent.stoppedPropagation = true },
-      preventDefault: function() { endEvent.preventedDefault = true }
+      stopPropagation: function() { e.stoppedPropagation = true },
+      preventDefault: function() { e.preventedDefault = true }
     };
 
     tapPointerMoved = true;
-    expect( tapClick(startEvent, endEvent) ).toEqual(false);
+    expect( tapClick(e) ).toEqual(false);
 
-  });
-
-  it('Should set tapMouseDownEvent on mousedown', function() {
-    expect(tapMouseDownEvent).toEqual(null);
-    var e = { type: 'mousedown' };
-    tapMouseDown(e);
-    expect(tapMouseDownEvent).toBe(e);
-  });
-
-  it('Should null tapMouseDownEvent on mouseup', function() {
-    var target = {
-      tagName: 'INPUT',
-      dispatchEvent: function() { target.dispatchedEvent = true },
-      focus: function() { target.focused = true },
-      blur: function() { target.blurred = true }
-    };
-    var e = { type: 'mousedown', target: target };
-    tapMouseDown(e);
-    expect(tapMouseDownEvent).toBe(e);
-    tapMouseUp({ type: 'mouseup', target: target });
-    expect(tapMouseDownEvent).toBe(null);
   });
 
   it('Should trigger click on mouseup and when nearby mousedown happened', function() {
-    var startEvent = {
+    var e = {
       type: 'mousedown',
       clientX: 100, clientY: 100,
       target: {
         tagName: 'INPUT',
-        dispatchEvent: function() { startEvent.target.dispatchedEvent = true },
-        focus: function() { startEvent.target.focused = true },
+        dispatchEvent: function() { e.target.dispatchedEvent = true },
+        focus: function() { e.target.focused = true },
       },
-      stopPropagation: function() { endEvent.stoppedPropagation = true },
-      preventDefault: function() { endEvent.preventedDefault = true }
-    };
-    var endEvent = {
-      type: 'mouseup',
-      clientX: 101, clientY: 101,
-      target: {
-        tagName: 'INPUT',
-        dispatchEvent: function() { startEvent.target.dispatchedEvent = true },
-        focus: function() { startEvent.target.focused = true },
-      },
-      stopPropagation: function() { endEvent.stoppedPropagation = true },
-      preventDefault: function() { endEvent.preventedDefault = true }
+      stopPropagation: function() { e.stoppedPropagation = true },
+      preventDefault: function() { e.preventedDefault = true }
     };
 
-    expect( startEvent.target.dispatchedEvent ).toBeUndefined();
+    expect( e.target.dispatchedEvent ).toBeUndefined();
 
-    tapMouseDown(startEvent);
-    expect(tapMouseDownEvent).toBe(startEvent);
-    tapMouseUp(endEvent);
+    tapMouseDown({clientX: 101, clientY: 101});
+    tapMouseUp(e);
 
-    expect( startEvent.target.dispatchedEvent ).toBeDefined();
-    expect(tapMouseDownEvent).toBe(null);
+    expect( e.target.dispatchedEvent ).toBeDefined();
   });
 
   it('Should not trigger click on mouseup because mousedown coordinates too far away', function() {
-    var startEvent = {
-      type: 'mousedown',
+    var e = {
       clientX: 100, clientY: 100,
       target: {
         tagName: 'INPUT',
-        dispatchEvent: function() { startEvent.target.dispatchedEvent = true },
-        focus: function() { startEvent.target.focused = true },
+        dispatchEvent: function() { e.target.dispatchedEvent = true },
+        focus: function() { e.target.focused = true },
       },
-      stopPropagation: function() { endEvent.stoppedPropagation = true },
-      preventDefault: function() { endEvent.preventedDefault = true }
-    };
-    var endEvent = {
-      type: 'mouseup',
-      clientX: 200, clientY: 200,
-      stopPropagation: function() { endEvent.stoppedPropagation = true },
-      preventDefault: function() { endEvent.preventedDefault = true }
+      stopPropagation: function() { e.stoppedPropagation = true },
+      preventDefault: function() { e.preventedDefault = true }
     };
 
-    expect( startEvent.target.dispatchedEvent ).toBeUndefined();
+    expect( e.target.dispatchedEvent ).toBeUndefined();
 
-    tapMouseDown(startEvent);
-    expect(tapMouseDownEvent).toBe(startEvent);
-    tapMouseUp(endEvent);
+    tapMouseDown({clientX: 201, clientY: 101});
+    tapMouseUp(e);
 
-    expect( startEvent.target.dispatchedEvent ).toBeUndefined();
-    expect(tapMouseDownEvent).toBe(null);
+    expect( e.target.dispatchedEvent ).toBeUndefined();
   });
 
   it('Should set tapHasPointerMoved=false on tapTouchStart', function() {
@@ -285,122 +207,45 @@ describe('Ionic Tap', function() {
     expect( tapPointerMoved ).toEqual(true);
   });
 
-  it('Should set tapTouchStartEvent on touchstart', function() {
-    expect(tapTouchStartEvent).toEqual(null);
-    var e = { type: 'touchstart' };
-    tapTouchStart(e);
-    expect(tapTouchStartEvent).toBe(e);
-  });
-
-  it('Should null tapTouchStartEvent on touchend', function() {
-    var target = {
-      tagName: 'INPUT',
-      dispatchEvent: function() { target.dispatchedEvent = true },
-      focus: function() { target.focused = true },
-      blur: function() { target.blurred = true }
-    };
-    var e = { type: 'touchstart', target: target };
-    tapTouchStart(e);
-    expect(tapTouchStartEvent).toBe(e);
-    tapTouchEnd({ type: 'touchend', target: target });
-    expect(tapTouchStartEvent).toBe(null);
-  });
-
   it('Should trigger click on touchend and nearby touchstart happened', function() {
-    var startEvent = {
-      type: 'touchstart',
-      clientX: 100, clientY: 100,
-      target: {
-        tagName: 'INPUT',
-        dispatchEvent: function() { startEvent.target.dispatchedEvent = true },
-        focus: function() { startEvent.target.focused = true },
-      },
-      stopPropagation: function() { endEvent.stoppedPropagation = true },
-      preventDefault: function() { endEvent.preventedDefault = true }
-    };
-    var endEvent = {
+    var e = {
       type: 'touchend',
       clientX: 101, clientY: 101,
       target: {
         tagName: 'INPUT',
-        dispatchEvent: function() { startEvent.target.dispatchedEvent = true },
-        focus: function() { startEvent.target.focused = true },
+        dispatchEvent: function() { e.target.dispatchedEvent = true },
+        focus: function() { e.target.focused = true },
       },
-      stopPropagation: function() { endEvent.stoppedPropagation = true },
-      preventDefault: function() { endEvent.preventedDefault = true }
+      stopPropagation: function() { e.stoppedPropagation = true },
+      preventDefault: function() { e.preventedDefault = true }
     };
 
-    expect( startEvent.target.dispatchedEvent ).toBeUndefined();
+    tapTouchStart({clientX: 100, clientY: 100});
+    tapTouchEnd(e);
 
-    tapTouchStart(startEvent);
-    expect(tapTouchStartEvent).toBe(startEvent);
-    tapTouchEnd(endEvent);
-
-    expect( startEvent.target.dispatchedEvent ).toBeDefined();
-    expect(tapTouchStartEvent).toBe(null);
+    expect( e.target.dispatchedEvent ).toBeDefined();
   });
 
   it('Should not trigger click on touchend because touchstart coordinates too far away', function() {
-    var startEvent = {
+    var e = {
       type: 'touchstart',
       clientX: 100, clientY: 100,
       target: {
         tagName: 'INPUT',
-        dispatchEvent: function() { startEvent.target.dispatchedEvent = true },
-        focus: function() { startEvent.target.focused = true },
+        dispatchEvent: function() { e.target.dispatchedEvent = true },
+        focus: function() { e.target.focused = true },
       },
-      stopPropagation: function() { endEvent.stoppedPropagation = true },
-      preventDefault: function() { endEvent.preventedDefault = true }
-    };
-    var endEvent = {
-      type: 'touchend',
-      clientX: 201, clientY: 201,
-      stopPropagation: function() { endEvent.stoppedPropagation = true },
-      preventDefault: function() { endEvent.preventedDefault = true }
+      stopPropagation: function() { e.stoppedPropagation = true },
+      preventDefault: function() { e.preventedDefault = true }
     };
 
-    expect( startEvent.target.dispatchedEvent ).toBeUndefined();
+    expect( e.target.dispatchedEvent ).toBeUndefined();
 
-    tapTouchStart(startEvent);
-    expect(tapTouchStartEvent).toBe(startEvent);
-    tapTouchEnd(endEvent);
+    tapTouchStart({clientX: 200, clientY: 100});
 
-    expect( startEvent.target.dispatchedEvent ).toBeUndefined();
-    expect(tapTouchStartEvent).toBe(null);
-  });
+    tapTouchEnd(e);
 
-  it('Should still trigger click on mouseup without a mousedown', function() {
-    var endEvent = {
-      type: 'mouseup',
-      clientX: 100, clientY: 100,
-      target: {
-        tagName: 'INPUT',
-        dispatchEvent: function() { endEvent.target.dispatchedEvent = true },
-        focus: function() { endEvent.target.focused = true },
-      },
-      stopPropagation: function() { endEvent.stoppedPropagation = true },
-      preventDefault: function() { endEvent.preventedDefault = true }
-    };
-    tapMouseUp(endEvent);
-    expect(endEvent.target.dispatchedEvent).toBeDefined();
-    expect(tapMouseDownEvent).toBe(null);
-  });
-
-  it('Should still trigger click on touchend without a touchstart', function() {
-    var endEvent = {
-      type: 'touchend',
-      target: {
-        tagName: 'INPUT',
-        dispatchEvent: function() { endEvent.target.dispatchedEvent = true },
-        focus: function() { endEvent.target.focused = true },
-      },
-      clientX: 201, clientY: 201,
-      stopPropagation: function() { endEvent.stoppedPropagation = true },
-      preventDefault: function() { endEvent.preventedDefault = true }
-    };
-    tapTouchEnd(endEvent);
-    expect(endEvent.target.dispatchedEvent).toBeDefined();
-    expect(tapTouchStartEvent).toBe(null);
+    expect( e.target.dispatchedEvent ).toBeUndefined();
   });
 
   it('Should tapEnabledTouchEvents because of touchstart', function() {
@@ -410,14 +255,13 @@ describe('Ionic Tap', function() {
   });
 
   it('Should cancel click on touchcancel', function() {
-    tapTouchStartEvent = {};
-    tapTouchCancel({});
-    expect(tapTouchStartEvent).toBe(null);
+    tapTouchCancel();
+    expect(tapPointerMoved).toEqual(false);
   });
 
   it('Should cancel click when touchmove coordinates goes too far from touchstart coordinates', function() {
-    var startEvent = { clientX: 100, clientY: 100 };
-    tapTouchStart(startEvent);
+    var e = { clientX: 100, clientY: 100 };
+    tapTouchStart(e);
 
     expect( tapTouchMove({ clientX: 102, clientY: 100 }) ).toBeUndefined();
 
@@ -427,17 +271,18 @@ describe('Ionic Tap', function() {
   });
 
   it('Should cancel click when touchend coordinates are too far from touchstart coordinates', function() {
-    var startEvent = { clientX: 100, clientY: 100 };
-    tapTouchStart(startEvent);
-    expect(tapTouchStartEvent).toBe(startEvent);
-
+    var e = {
+      clientX: 100, clientY: 100,
+      dispatchEvent: function(){ this.dispatchedEvent = true; }
+    };
+    tapTouchStart(e);
     tapTouchEnd({ clientX: 200, clientY: 100 })
-    expect(tapTouchStartEvent).toBe(null);
+    expect( e.dispatchedEvent ).toBeUndefined();
   });
 
   it('Should cancel click when mousemove coordinates goes too far from mousedown coordinates', function() {
-    var startEvent = { clientX: 100, clientY: 100 };
-    tapMouseDown(startEvent);
+    var e = { clientX: 100, clientY: 100 };
+    tapMouseDown(e);
 
     expect( tapMouseMove({ clientX: 102, clientY: 100 }) ).toBeUndefined();
 
@@ -447,38 +292,17 @@ describe('Ionic Tap', function() {
   });
 
   it('Should cancel click when mouseup coordinates are too far from mousedown coordinates', function() {
-    var startEvent = { clientX: 100, clientY: 100 };
-    tapMouseDown(startEvent);
-    expect(tapMouseDownEvent).toBe(startEvent);
-
-    tapMouseUp({ clientX: 200, clientY: 100 })
-    expect(tapMouseDownEvent).toBe(null);
-  });
-
-  it('Should tapPointerStartEvent touchstart from touchend event', function() {
-    var startEvent = { clientX: 100, clientY: 100 };
-    tapTouchStart(startEvent);
-
-    var endEvent = { clientX: 200, clientY: 100, pointerType: 'touch' };
-    expect( tapPointerStartEvent(endEvent) ).toBe(startEvent);
-
-    endEvent = { clientX: 200, clientY: 100, type: 'touchend' };
-    expect( tapPointerStartEvent(endEvent) ).toBe(startEvent);
-  });
-
-  it('Should tapPointerStartEvent mousedown from mouse event', function() {
-    var startEvent = { clientX: 100, clientY: 100 };
-    tapMouseDown(startEvent);
-
-    var endEvent = { clientX: 102, clientY: 102, type: 'mousedown' };
-    expect( tapPointerStartEvent(endEvent) ).toBe(startEvent);
-
-    endEvent = { clientX: 102, clientY: 102 };
-    expect( tapPointerStartEvent(endEvent) ).toBe(startEvent);
+    var e = {
+      clientX: 100, clientY: 100,
+      dispatchEvent: function(){ this.dispatchedEvent = true; }
+    };
+    tapMouseDown(e);
+    tapMouseUp({ clientX: 200, clientY: 100 });
+    expect( e.dispatchedEvent ).toBeUndefined();
   });
 
   it('Should tapClick with touchend and fire immediately', function() {
-    var startEvent = {
+    var e = {
       target: {
         tagName: 'button',
         dispatchEvent: function(){
@@ -486,9 +310,8 @@ describe('Ionic Tap', function() {
         }
       }
     }
-    var endEvent = { type: 'touchend', clientX: 100, clientY: 100, target: document.createElement('div') };
-    tapClick(startEvent, endEvent);
-    expect(startEvent.target.dispatchedEvent).toEqual(true);
+    tapClick(e);
+    expect(e.target.dispatchedEvent).toEqual(true);
   });
 
   it('Should tapHasPointerMoved false if are null', function() {
@@ -501,9 +324,9 @@ describe('Ionic Tap', function() {
   });
 
   it('Should tapPointerStart false if are null', function() {
-    var endEvent = {};
+    var e = {};
     tapPointerStart = {x:0, y:0};
-    expect( tapHasPointerMoved(endEvent) ).toEqual(false);
+    expect( tapHasPointerMoved(e) ).toEqual(false);
   });
 
   it('Should tapHasPointerMoved true if greater than or equal to release tolerance', function() {
@@ -515,10 +338,10 @@ describe('Ionic Tap', function() {
     s = tapHasPointerMoved({ clientX: 89, clientY: 100 });
     expect(s).toEqual(true);
 
-    s = tapHasPointerMoved({ clientX: 100, clientY: 107 });
+    s = tapHasPointerMoved({ clientX: 100, clientY: 109 });
     expect(s).toEqual(true);
 
-    s = tapHasPointerMoved({ clientX: 100, clientY: 93 });
+    s = tapHasPointerMoved({ clientX: 100, clientY: 91 });
     expect(s).toEqual(true);
 
     s = tapHasPointerMoved({ clientX: 100, clientY: 200 });
@@ -545,27 +368,9 @@ describe('Ionic Tap', function() {
   });
 
   it('Should not be tapHasPointerMoved if 0 coordinates', function() {
-    var startEvent = { clientX: 0, clientY: 0 };
-    var s = tapHasPointerMoved(startEvent, { clientX: 100, clientY: 100 });
+    var e = { clientX: 0, clientY: 0 };
+    var s = tapHasPointerMoved(e, { clientX: 100, clientY: 100 });
     expect(s).toEqual(false);
-  });
-
-  it('Should dispatch a mouse event', function() {
-    var startEvent = {
-      clientX: 99, clientY: 88,
-      target: {
-        dispatchEvent: function(clickEvent) {
-          this.clickEvent = clickEvent;
-        },
-        tagName: 'INPUT',
-        focus: function() { startEvent.target.focused = true }
-      }
-    };
-    var endEvent = { clientX: 100, clientY: 90, target: document.createElement('div') };
-    tapClick(startEvent, endEvent);
-
-    expect(startEvent.target.clickEvent.clientX).toEqual(100);
-    expect(startEvent.target.clickEvent.clientY).toEqual(90);
   });
 
   it('Should get coordinates from page mouse event', function() {
@@ -616,47 +421,67 @@ describe('Ionic Tap', function() {
     var targetEle = document.createElement('input');
     targetEle.disabled = true;
 
-    var startEvent = {
+    var e = {
       target: targetEle
     }
 
-    expect( tapClick(startEvent) ).toEqual(false);
+    expect( tapClick(e) ).toEqual(false);
   });
 
-  it('Should not tapClick for input[range] elements', function() {
-    // Range and tap do not agree, probably because it doesn't have a delay to begin with
-    var targetEle = document.createElement('input');
-    targetEle.type = 'range';
-
-    var startEvent = {
-      target: targetEle
-    }
-
-    expect( tapClick(startEvent) ).toEqual(false);
+  it('Should tapRequiresNativeClick for invalid element', function() {
+    expect( tapRequiresNativeClick( null ) ).toEqual(true);
   });
 
-  it('Should not tapIgnoreElementClick for common inputs', function() {
+  it('Should tapRequiresNativeClick for input.disabled', function() {
+    var ele = document.createElement('input');
+    ele.disabled = true;
+    expect( tapRequiresNativeClick( ele ) ).toEqual(true);
+  });
+
+  it('Should tapRequiresNativeClick for input[range]', function() {
+    var ele = document.createElement('input');
+    ele.type = 'range';
+    expect( tapRequiresNativeClick( ele ) ).toEqual(true);
+  });
+
+  it('Should tapRequiresNativeClick for input[file]', function() {
+    var ele = document.createElement('input');
+    ele.type = 'file';
+    expect( tapRequiresNativeClick( ele ) ).toEqual(true);
+  });
+
+  it('Should tapRequiresNativeClick for video element', function() {
+    var ele = document.createElement('video');
+    expect( tapRequiresNativeClick( ele ) ).toEqual(true);
+  });
+
+  it('Should tapRequiresNativeClick for object element', function() {
+    var ele = document.createElement('object');
+    expect( tapRequiresNativeClick( ele ) ).toEqual(true);
+  });
+
+  it('Should not tapRequiresNativeClick for common inputs', function() {
     var inputTypes = ['text', 'email', 'search', 'tel', 'number', 'date', 'month', 'password', null, undefined, ''];
     for(var x=0; x<inputTypes.length; x++) {
       var targetEle = document.createElement('input');
       targetEle.type = inputTypes[x];
-      expect( tapIgnoreElementClick(targetEle) ).toEqual(false);
+      expect( tapRequiresNativeClick(targetEle) ).toEqual(false);
     }
-    expect( tapIgnoreElementClick( document.createElement('img') ) ).toEqual(false);
-    expect( tapIgnoreElementClick( document.createElement('div') ) ).toEqual(false);
-    expect( tapIgnoreElementClick( document.createElement('textarea') ) ).toEqual(false);
-    expect( tapIgnoreElementClick( document.createElement('select') ) ).toEqual(false);
+    expect( tapRequiresNativeClick( document.createElement('img') ) ).toEqual(false);
+    expect( tapRequiresNativeClick( document.createElement('div') ) ).toEqual(false);
+    expect( tapRequiresNativeClick( document.createElement('textarea') ) ).toEqual(false);
+    expect( tapRequiresNativeClick( document.createElement('select') ) ).toEqual(false);
   });
 
-  it('Should tapIgnoreElementClick for an element with data-tap-disabled attribute', function() {
+  it('Should tapRequiresNativeClick for an element with data-tap-disabled attribute', function() {
     var div = document.createElement('div');
-    expect( tapIgnoreElementClick( div ) ).toEqual(false);
+    expect( tapRequiresNativeClick( div ) ).toEqual(false);
 
     div.setAttribute('data-tap-disabled', "true")
-    expect( tapIgnoreElementClick( div ) ).toEqual(true);
+    expect( tapRequiresNativeClick( div ) ).toEqual(true);
   });
 
-  it('Should tapIgnoreElementClick for an element with one of its parents with data-tap-disabled attribute', function() {
+  it('Should tapRequiresNativeClick for an element with one of its parents with data-tap-disabled attribute', function() {
     var div1 = document.createElement('div');
     var div2 = document.createElement('div');
     var div3 = document.createElement('div');
@@ -670,11 +495,11 @@ describe('Ionic Tap', function() {
 
     div2.setAttribute('data-tap-disabled', "true");
 
-    expect( tapIgnoreElementClick( div1 ) ).toEqual(false);
-    expect( tapIgnoreElementClick( div2 ) ).toEqual(true);
-    expect( tapIgnoreElementClick( div3 ) ).toEqual(true);
-    expect( tapIgnoreElementClick( div4 ) ).toEqual(true);
-    expect( tapIgnoreElementClick( div5 ) ).toEqual(true);
+    expect( tapRequiresNativeClick( div1 ) ).toEqual(false);
+    expect( tapRequiresNativeClick( div2 ) ).toEqual(true);
+    expect( tapRequiresNativeClick( div3 ) ).toEqual(true);
+    expect( tapRequiresNativeClick( div4 ) ).toEqual(true);
+    expect( tapRequiresNativeClick( div5 ) ).toEqual(true);
   });
 
   it('Should not allow a click that has an input target but not created by tapClick', function() {
@@ -817,6 +642,12 @@ describe('Ionic Tap', function() {
       target: target
     };
     expect( ionic.tap.ignoreScrollStart(e) ).toEqual(false);
+
+    e.target = document.createElement('textarea');
+    expect( ionic.tap.ignoreScrollStart(e) ).toEqual(false);
+
+    e.target = document.createElement('select');
+    expect( ionic.tap.ignoreScrollStart(e) ).toEqual(false);
   });
 
   it('Should prevent scrolling if the target was an input or textarea, and the target is the same as the active element', function() {
@@ -889,40 +720,33 @@ describe('Ionic Tap', function() {
     expect( ionic.tap.ignoreScrollStart(e) ).toEqual(true);
   });
 
-  it('Should get target element from startEvent', function() {
-    var startEvent = {
+  it('Should get target element from event', function() {
+    var e = {
       target: document.createElement('div')
     };
-    expect( tapTargetElement(startEvent, null).tagName ).toEqual('DIV');
+    expect( tapTargetElement(e).tagName ).toEqual('DIV');
   });
 
-  it('Should get target element from endEvent', function() {
-    var endEvent = {
-      target: document.createElement('div')
-    };
-    expect( tapTargetElement(null, endEvent).tagName ).toEqual('DIV');
-  });
-
-  it('Should get labels input control from startEvents target', function() {
+  it('Should get labels input control from event target', function() {
     var label = document.createElement('label');
     var input = document.createElement('input');
     label.appendChild(input);
 
-    var startEvent = {
+    var e = {
       target: label
     };
-    expect( tapTargetElement(startEvent, null).tagName ).toEqual('INPUT');
+    expect( tapTargetElement(e).tagName ).toEqual('INPUT');
   });
 
-  it('Should get button target even if it has children from startEvents target', function() {
+  it('Should get button target even if it has children from es target', function() {
     var button = document.createElement('button');
     var span = document.createElement('span');
     button.appendChild(span);
 
-    var startEvent = {
+    var e = {
       target: button
     };
-    expect( tapTargetElement(startEvent, null).tagName ).toEqual('BUTTON');
+    expect( tapTargetElement(e, null).tagName ).toEqual('BUTTON');
   });
 
 });

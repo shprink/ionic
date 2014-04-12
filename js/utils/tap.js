@@ -30,15 +30,12 @@
 
 var tapDoc; // the element which the listeners are on (document.body)
 var tapActiveEle; // the element which is active (probably has focus)
-var tapMouseDownEvent; // the mousedown event before a mouseup
-var tapTouchStartEvent; // the touchstart event before a touchend
 var tapEnabledTouchEvents;
 var tapMouseResetTimer;
 var tapPointerMoved;
 var tapPointerStart;
 
-var TAP_RELEASE_TOLERANCE_X = 10; // how much the X coordinates can be off between start/end, but still a click
-var TAP_RELEASE_TOLERANCE_Y = 6; // how much the Y coordinates can be off between start/end, but still a click
+var TAP_RELEASE_TOLERANCE = 6; // how much the coordinates can be off between start/end, but still a click
 
 var tapEventListeners = {
   'click': tapClickGateKeeper,
@@ -74,8 +71,6 @@ ionic.tap = {
       }
       tapDoc = null;
       tapActiveEle = null;
-      tapMouseDownEvent = null;
-      tapTouchStartEvent = null;
       tapEnabledTouchEvents = false;
       tapPointerMoved = false;
       tapPointerStart = null;
@@ -84,10 +79,10 @@ ionic.tap = {
 
   ignoreScrollStart: function(e) {
     return (e.defaultPrevented) ||  // defaultPrevented has been assigned by another component handling the event
-           (e.target.tagName.match(/input|textarea|select/i) && tapActiveElement() === e.target) || // target is the active element, so its a second tap to select input text
+           ((/input|textarea|select/i).test(e.target.tagName) && tapActiveElement() === e.target) || // target is the active element, so its a second tap to select input text
            (e.target.isContentEditable) ||
            (e.target.dataset ? e.target.dataset.preventScroll : e.target.getAttribute('data-prevent-default')) == 'true' || // manually set within an elements attributes
-           (!!e.target.tagName.match(/object|embed/i));  // flash/movie/object touches should not try to scroll
+           (!!(/object|embed/i).test(e.target.tagName));  // flash/movie/object touches should not try to scroll
   }
 
 };
@@ -100,15 +95,15 @@ function tapEventListener(type, enable, useCapture) {
   }
 }
 
-function tapClick(startEvent, endEvent) {
+function tapClick(e) {
   // simulate a normal click by running the element's click method then focus on it
-  var ele = tapTargetElement(startEvent, endEvent);
+  var ele = tapTargetElement(e);
 
-  if( tapIgnoreElementClick(ele) || tapPointerMoved ) return false;
+  if( tapRequiresNativeClick(ele) || tapPointerMoved ) return false;
 
-  var c = getPointerCoordinates(endEvent);
+  var c = getPointerCoordinates(e);
 
-  console.debug('tapClick', endEvent.type, ele.tagName, '('+c.x+','+c.y+')');
+  console.debug('tapClick', e.type, ele.tagName, '('+c.x+','+c.y+')');
 
   // using initMouseEvent instead of MouseEvent for our Android friends
   var clickEvent = document.createEvent("MouseEvents");
@@ -116,21 +111,20 @@ function tapClick(startEvent, endEvent) {
                             1, 0, 0, c.x, c.y,
                             false, false, false, false, 0, null);
   clickEvent.isIonicTap = true;
-  clickEvent.pointerType = (endEvent.type == 'touchend' ? 'touch' : 'mouse');
   ele.dispatchEvent(clickEvent);
 
   // if it's an input, focus in on the target, otherwise blur
   tapHandleFocus(ele);
 
-  if(endEvent.target.tagName == 'LABEL') {
+  if(e.target.tagName == 'LABEL') {
     console.debug('label preventDefault');
-    endEvent.preventDefault();
+    e.preventDefault();
   }
 }
 
 function tapClickGateKeeper(e) {
   // do not allow through any click events that were not created by ionic.tap
-  if( !e.isIonicTap && !tapIgnoreElementClick(e.target) ) {
+  if( !e.isIonicTap && !tapRequiresNativeClick(e.target) ) {
     console.debug('clickPrevent', e.target.tagName);
     e.stopPropagation();
     e.preventDefault();
@@ -138,18 +132,17 @@ function tapClickGateKeeper(e) {
   }
 }
 
-function tapIgnoreElementClick(ele) {
-  if(!ele || ele.disabled || ele.type === 'range') {
+function tapRequiresNativeClick(ele) {
+  if(!ele || ele.disabled || ele.type === 'range' || ele.type === 'file' || ele.tagName === 'VIDEO' || ele.tagName === 'OBJECT' ) {
     return true;
   }
   if(ele.nodeType === 1) {
     var element = ele;
-    for(var x=0; x<8; x++) {
+    while(element) {
       if( (element.dataset ? element.dataset.tapDisabled : element.getAttribute('data-tap-disabled')) == 'true' ) {
         return true;
       }
       element = element.parentElement;
-      if(!element) break;
     }
   }
   return false;
@@ -161,7 +154,6 @@ function tapMouseDown(e) {
   e.isTapHandled = true;
   tapPointerMoved = false;
 
-  tapMouseDownEvent = e;
   tapPointerStart = getPointerCoordinates(e);
 
   if(tapEnabledTouchEvents && !e.isIonicMouseDown) {
@@ -180,9 +172,8 @@ function tapMouseUp(e) {
   e.isTapHandled = true;
 
   if( !tapHasPointerMoved(e) ) {
-    tapClick(tapMouseDownEvent, e);
+    tapClick(e);
   }
-  tapMouseDownEvent = null;
   tapEventListener('mousemove', false);
   ionic.activator.end();
   tapPointerMoved = false;
@@ -205,7 +196,6 @@ function tapTouchStart(e) {
   tapPointerMoved = false;
 
   tapEnableTouchEvents();
-  tapTouchStartEvent = e;
   tapPointerStart = getPointerCoordinates(e);
 
   tapEventListener('touchmove');
@@ -216,13 +206,9 @@ function tapTouchEnd(e) {
   if(e.isTapHandled) return;
   e.isTapHandled = true;
 
-  if(!tapTouchStartEvent) {
-    tapPointerStart = getPointerCoordinates(e);
-  }
-
   tapEnableTouchEvents();
   if( !tapHasPointerMoved(e) ) {
-    tapClick(tapTouchStartEvent, e);
+    tapClick(e);
   }
 
   tapTouchCancel();
@@ -238,7 +224,6 @@ function tapTouchMove(e) {
 }
 
 function tapTouchCancel(e) {
-  tapTouchStartEvent = null;
   tapEventListener('touchmove', false);
   ionic.activator.end();
   tapPointerMoved = false;
@@ -258,13 +243,6 @@ function tapResetMouseEvent() {
   tapEnabledTouchEvents = false;
 }
 
-function tapPointerStartEvent(e) {
-  if(e.pointerType == 'touch' || e.type == 'touchend') {
-    return tapTouchStartEvent;
-  }
-  return tapMouseDownEvent;
-}
-
 function tapHandleFocus(ele) {
   if(ele.tagName == 'SELECT') {
     // trick to force Android options to show up
@@ -279,7 +257,7 @@ function tapHandleFocus(ele) {
     ele.focus && ele.focus();
 
   } else if(tapActiveElement() !== ele) {
-    if( ele.tagName.match(/input|textarea/i) ) {
+    if( (/input|textarea/i).test(ele.tagName) ) {
       console.debug('tapHandleFocus', ele.tagName);
       tapActiveElement(ele);
       ele.focus();
@@ -291,7 +269,7 @@ function tapHandleFocus(ele) {
 
 function tapFocusOutActive() {
   var ele = tapActiveElement();
-  if(ele && ele.tagName.match(/input|textarea|select/i) ) {
+  if(ele && (/input|textarea|select/i).test(ele.tagName) ) {
     console.debug('tapFocusOutActive', ele.tagName);
     ele.blur();
   }
@@ -315,8 +293,8 @@ function tapHasPointerMoved(endEvent) {
   }
   var endCoordinates = getPointerCoordinates(endEvent);
 
-  return Math.abs(tapPointerStart.x - endCoordinates.x) > TAP_RELEASE_TOLERANCE_X ||
-         Math.abs(tapPointerStart.y - endCoordinates.y) > TAP_RELEASE_TOLERANCE_Y;
+  return Math.abs(tapPointerStart.x - endCoordinates.x) > TAP_RELEASE_TOLERANCE ||
+         Math.abs(tapPointerStart.y - endCoordinates.y) > TAP_RELEASE_TOLERANCE;
 }
 
 function getPointerCoordinates(event) {
@@ -334,8 +312,8 @@ function getPointerCoordinates(event) {
   return c;
 }
 
-function tapTargetElement(startEvent, endEvent) {
-  var ele = startEvent ? startEvent.target : endEvent.target;
+function tapTargetElement(e) {
+  var ele = e.target;
 
   if(ele && ele.tagName === 'LABEL') {
     if(ele.control) return ele.control;
@@ -348,7 +326,6 @@ function tapTargetElement(startEvent, endEvent) {
   }
   return ele;
 }
-
 
 ionic.DomUtil.ready(function(){
 
