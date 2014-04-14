@@ -664,6 +664,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
     - Does not change focus 300ms after when tapping an input and the keyboard shows up
     - The blinking cursor says in the input 300ms after the tap
     - Can hit the keyboard's "next" button to change focus to the next input
+    - When flicking down a page, and a target was an input, it shouldn't focus and jank scrolling
     */
 
     ionic.scroller = {
@@ -690,7 +691,9 @@ ionic.views.Scroll = ionic.views.View.inherit({
           return;
         }
 
-        if( !self.__hasStarted ) {
+        if( !self.__hasStarted && ionic.tap.isTextInput(e.target) ) {
+          // the target is a text input and scroll has started
+          // since the text input doesn't start on touchStart, do it here
           self.__hasStarted = true;
           self.doTouchStart(e.touches, e.timeStamp);
           e.preventDefault();
