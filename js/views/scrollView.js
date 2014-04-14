@@ -599,7 +599,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
     container.addEventListener('scrollChildIntoView', function(e) {
       var keyboardHeight = e.detail.keyboardHeight || 0;
       var deviceHeight = window.innerHeight;
-      
+
       var frameHeight;
       if (parseFloat(device.version) >= 7.0){
         frameHeight = deviceHeight;
@@ -607,21 +607,21 @@ ionic.views.Scroll = ionic.views.View.inherit({
       else {
         frameHeight = deviceHeight - keyboardHeight;
       }
-      
+
       var element = e.target;
 
       //getBoundingClientRect() will actually give us position relative to the viewport
       var elementDeviceBottom = element.getBoundingClientRect().bottom;
-      
+
       if (e.detail.firstKeyboardShow){
         //shrink scrollview so we can actually scroll if the input is hidden
         //if it isn't shrink so we can scroll to inputs under the keyboard
         container.style.height = (container.clientHeight - keyboardHeight) + "px";
-        
+
         //update scroll view
         self.resize();
       }
-        
+
       //If the element is positioned under the keyboard...
       if (elementDeviceBottom > frameHeight) {
         //Put element in middle of visible screen
@@ -633,7 +633,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
           var scrollViewMidpointOffset = container.clientHeight * 0.5;
           var scrollOffset = keyboardTopOffset + scrollViewMidpointOffset;
           self.scrollBy(0, scrollOffset, true);
-          
+
           //please someone tell me there's a better way to do this
           //wait until input is scrolled into view, then fix focus
           setTimeout(function(){
@@ -646,7 +646,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
       //(the active element that needs to be shown) should receive this event
       e.stopPropagation();
     });
-                                              
+
     container.addEventListener('resetScrollView', function(e) {
       //return scrollview to original height once keyboard has hidden
       container.style.height = "";
@@ -655,26 +655,61 @@ ionic.views.Scroll = ionic.views.View.inherit({
       }, 48)
     });
 
-    if ('ontouchstart' in window) {
+    /*
+    - Can scroll when target is a text input, but it does not have focus
+    - Can tap on a text input and focus
+    - Can scroll when the target is a text input and it already has focus
+    - Can hold a text input and move its text caret/cursor
+    - Can scroll when the target is a label
+    - Does not change focus 300ms after when tapping an input and the keyboard shows up
+    - The blinking cursor says in the input 300ms after the tap
+    - Can hit the keyboard's "next" button to change focus to the next input
+    */
 
-      container.addEventListener("touchstart", function(e) {
+    ionic.scroller = {
+
+      touchStart: function(e) {
         if ( ionic.tap.ignoreScrollStart(e) ) {
           return;
         }
+
+        if( ionic.tap.isTextInput(e.target) ) {
+          // do not start if the target is a text input
+          // if there is a touchmove on this input, then we can start the scroll
+          self.__hasStarted = false
+          return;
+        }
+
+        self.__hasStarted = true;
         self.doTouchStart(e.touches, e.timeStamp);
         e.preventDefault();
-      }, false);
+      },
 
-      document.addEventListener("touchmove", function(e) {
+      touchMove: function(e) {
         if(e.defaultPrevented) {
           return;
         }
-        self.doTouchMove(e.touches, e.timeStamp);
-      }, false);
 
-      document.addEventListener("touchend", function(e) {
+        if( !self.__hasStarted ) {
+          self.__hasStarted = true;
+          self.doTouchStart(e.touches, e.timeStamp);
+          e.preventDefault();
+        } else {
+          self.doTouchMove(e.touches, e.timeStamp);
+        }
+      },
+
+      touchEnd: function(e) {
         self.doTouchEnd(e.timeStamp);
-      }, false);
+        self.__hasStarted = false;
+      }
+
+    };
+
+    if ('ontouchstart' in window) {
+      container.addEventListener("touchstart", ionic.scroller.touchStart, false);
+      document.addEventListener("touchmove", ionic.scroller.touchMove, false);
+      document.addEventListener("touchend", ionic.scroller.touchEnd, false);
 
     } else {
 

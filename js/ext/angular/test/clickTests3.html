@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>iPad input focus</title>
+<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+  <style type="text/css">
+
+    body, body * { margin: 0; padding: 0; }
+
+    .input {
+      height: 50px;
+    }
+
+    .input:focus {
+      background: yellow;
+    }
+
+  </style>
+</head>
+<body>
+  <input id="input" type="text" class="input" />
+</body>
+</html>
+
+<script type="text/javascript">
+  var input = document.querySelector('#input');
+
+  function showKeyboard(){
+    var iframe = document.createElement('iframe');
+    iframe.src = "prompt.html";
+    document.body.appendChild(iframe);
+
+    input.focus();
+    setTimeout(function(){
+      document.body.removeChild(iframe);
+    }, 100)
+
+  }
+
+  setTimeout(function(){
+    showKeyboard();
+   }, 1000);
+
+</script>

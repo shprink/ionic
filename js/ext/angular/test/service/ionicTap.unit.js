@@ -301,6 +301,15 @@ describe('Ionic Tap', function() {
     expect( e.dispatchedEvent ).toBeUndefined();
   });
 
+  it('Should do nothing if mousedown is a custom event from ionic tap', function() {
+    var e = {
+      isTapHandled: false,
+      isIonicTap: true
+    };
+    tapMouseDown(e);
+    expect( e.isTapHandled ).toEqual(false);
+  });
+
   it('Should tapClick with touchend and fire immediately', function() {
     var e = {
       target: {
@@ -558,6 +567,24 @@ describe('Ionic Tap', function() {
     expect( ele.hasFocus ).toEqual(true);
   });
 
+  it('Should set tapTouchFocusedInput if touch event and text input', function() {
+    tapEnabledTouchEvents = true;
+    var ele = {
+      tagName: 'TEXTAREA'
+    }
+    tapHandleFocus(ele);
+    expect( tapTouchFocusedInput ).toEqual(ele);
+  });
+
+  it('Should not set tapTouchFocusedInput if mouse event and text input', function() {
+    tapEnabledTouchEvents = false;
+    var ele = {
+      tagName: 'TEXTAREA'
+    }
+    tapHandleFocus(ele);
+    expect( tapTouchFocusedInput ).toEqual(null);
+  });
+
   it('Should focus select', function() {
     var ele = {
       tagName: 'SELECT',
@@ -566,6 +593,7 @@ describe('Ionic Tap', function() {
     }
     tapHandleFocus(ele);
     expect( ele.hasFocus ).toEqual(true);
+    expect( tapTouchFocusedInput ).toEqual(null);
   });
 
   it('Should not focus on common elements', function() {
@@ -650,13 +678,13 @@ describe('Ionic Tap', function() {
     expect( ionic.tap.ignoreScrollStart(e) ).toEqual(false);
   });
 
-  it('Should prevent scrolling if the target was an input or textarea, and the target is the same as the active element', function() {
+  it('Should not prevent scrolling if the target was an input or textarea, and the target is the same as the active element', function() {
     var target = document.createElement('input');
     tapActiveElement(target);
     var e = {
       target: target
     };
-    expect( ionic.tap.ignoreScrollStart(e) ).toEqual(true);
+    expect( ionic.tap.ignoreScrollStart(e) ).toEqual(false);
   });
 
   it('Should not prevent scrolling if the target isContentEditable', function() {
@@ -747,6 +775,57 @@ describe('Ionic Tap', function() {
       target: button
     };
     expect( tapTargetElement(e, null).tagName ).toEqual('BUTTON');
+  });
+
+  it('Should isTextInput', function() {
+    expect( ionic.tap.isTextInput(null) ).toEqual(false);
+
+    var ele = document.createElement('textarea');
+    expect( ionic.tap.isTextInput(ele) ).toEqual(true);
+
+    ele = document.createElement('input');
+    expect( ionic.tap.isTextInput(ele) ).toEqual(true);
+
+    ele.type = 'search';
+    expect( ionic.tap.isTextInput(ele) ).toEqual(true);
+
+    ele.type = 'url';
+    expect( ionic.tap.isTextInput(ele) ).toEqual(true);
+
+    ele.type = 'email';
+    expect( ionic.tap.isTextInput(ele) ).toEqual(true);
+
+    ele.type = 'range';
+    expect( ionic.tap.isTextInput(ele) ).toEqual(false);
+
+    ele.type = 'file';
+    expect( ionic.tap.isTextInput(ele) ).toEqual(false);
+
+    ele.type = 'submit';
+    expect( ionic.tap.isTextInput(ele) ).toEqual(false);
+
+    ele.type = 'reset';
+    expect( ionic.tap.isTextInput(ele) ).toEqual(false);
+  });
+
+  it('Should reset focus to tapTouchFocusedInput if the active element changed from mousedown', function() {
+    tapEnabledTouchEvents = true;
+    tapActiveElement(document.createElement('textarea'));
+
+    var tapFocusedEle = document.createElement('input');
+    tapFocusedEle.focus = function(){
+      this.hasFocus = true;
+    }
+
+    tapTouchFocusedInput = tapFocusedEle;
+
+    var e = {
+      target: document.createElement('input')
+    };
+    tapFocusIn(e);
+
+    expect( tapFocusedEle.hasFocus ).toEqual(true);
+    expect( tapTouchFocusedInput ).toEqual(null);
   });
 
 });

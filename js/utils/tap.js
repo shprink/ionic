@@ -34,6 +34,7 @@ var tapEnabledTouchEvents;
 var tapMouseResetTimer;
 var tapPointerMoved;
 var tapPointerStart;
+var tapTouchFocusedInput;
 
 var TAP_RELEASE_TOLERANCE = 6; // how much the coordinates can be off between start/end, but still a click
 
@@ -49,6 +50,7 @@ var tapEventListeners = {
   'touchcancel': tapTouchCancel,
   'touchmove': tapTouchMove,
 
+  'focusin': tapFocusIn,
   'focusout': tapFocusOut
 };
 
@@ -63,6 +65,7 @@ ionic.tap = {
     tapEventListener('touchstart');
     tapEventListener('touchend');
     tapEventListener('touchcancel');
+    tapEventListener('focusin');
     tapEventListener('focusout');
 
     return function() {
@@ -79,10 +82,15 @@ ionic.tap = {
 
   ignoreScrollStart: function(e) {
     return (e.defaultPrevented) ||  // defaultPrevented has been assigned by another component handling the event
-           ((/input|textarea|select/i).test(e.target.tagName) && tapActiveElement() === e.target) || // target is the active element, so its a second tap to select input text
            (e.target.isContentEditable) ||
            (e.target.dataset ? e.target.dataset.preventScroll : e.target.getAttribute('data-prevent-default')) == 'true' || // manually set within an elements attributes
            (!!(/object|embed/i).test(e.target.tagName));  // flash/movie/object touches should not try to scroll
+  },
+
+  isTextInput: function(ele) {
+    return !!ele &&
+           (ele.tagName == 'TEXTAREA' ||
+           (ele.tagName == 'INPUT' && !(/range|file|submit|reset/i).test(ele.type)));
   }
 
 };
@@ -104,14 +112,7 @@ function tapClick(e) {
   var c = getPointerCoordinates(e);
 
   console.debug('tapClick', e.type, ele.tagName, '('+c.x+','+c.y+')');
-
-  // using initMouseEvent instead of MouseEvent for our Android friends
-  var clickEvent = document.createEvent("MouseEvents");
-  clickEvent.initMouseEvent('click', true, true, window,
-                            1, 0, 0, c.x, c.y,
-                            false, false, false, false, 0, null);
-  clickEvent.isIonicTap = true;
-  ele.dispatchEvent(clickEvent);
+  triggerMouseEvent('click', ele, c.x, c.y);
 
   // if it's an input, focus in on the target, otherwise blur
   tapHandleFocus(ele);
@@ -120,6 +121,14 @@ function tapClick(e) {
     console.debug('label preventDefault');
     e.preventDefault();
   }
+}
+
+function triggerMouseEvent(type, ele, x, y) {
+  // using initMouseEvent instead of MouseEvent for our Android friends
+  var clickEvent = document.createEvent("MouseEvents");
+  clickEvent.initMouseEvent(type, true, true, window, 1, 0, 0, x, y, false, false, false, false, 0, null);
+  clickEvent.isIonicTap = true;
+  ele.dispatchEvent(clickEvent);
 }
 
 function tapClickGateKeeper(e) {
@@ -150,18 +159,26 @@ function tapRequiresNativeClick(ele) {
 
 // MOUSE
 function tapMouseDown(e) {
-  if(e.isTapHandled) return;
+  if(e.isIonicTap || e.isTapHandled) return;
   e.isTapHandled = true;
-  tapPointerMoved = false;
 
-  tapPointerStart = getPointerCoordinates(e);
-
-  if(tapEnabledTouchEvents && !e.isIonicMouseDown) {
-    console.debug('mouseDownPrevent');
+  if(tapEnabledTouchEvents) {
+    console.debug('mousedown', 'stop event');
     e.stopPropagation();
-    e.preventDefault();
+
+    if( !ionic.tap.isTextInput(e.target) ) {
+      // If you preventDefault on a text input then you cannot move its text caret/cursor.
+      // Allow through only the text input default. However, without preventDefault on an
+      // input the 300ms delay can change focus on inputs after the keyboard shows up.
+      // The focusin event handles the chance of focus changing after the keyboard shows.
+      e.preventDefault();
+    }
+
     return false;
   }
+
+  tapPointerMoved = false;
+  tapPointerStart = getPointerCoordinates(e);
 
   tapEventListener('mousemove');
   ionic.activator.start(e);
@@ -224,6 +241,7 @@ function tapTouchMove(e) {
 }
 
 function tapTouchCancel(e) {
+  console.debug('tapTouchCancel')
   tapEventListener('touchmove', false);
   ionic.activator.end();
   tapPointerMoved = false;
@@ -244,23 +262,24 @@ function tapResetMouseEvent() {
 }
 
 function tapHandleFocus(ele) {
+  tapTouchFocusedInput = null;
+
   if(ele.tagName == 'SELECT') {
     // trick to force Android options to show up
     console.debug('tapHandleFocus', ele.tagName);
-    var clickEvent = document.createEvent("MouseEvents");
-    clickEvent.initMouseEvent('mousedown', true, true, window,
-                              1, 0, 0, 0, 0,
-                              false, false, false, false, 0, null);
-    clickEvent.isIonicMouseDown = true;
-    ele.dispatchEvent(clickEvent);
+    triggerMouseEvent('mousedown', ele, 0, 0);
     tapActiveElement(ele);
     ele.focus && ele.focus();
 
   } else if(tapActiveElement() !== ele) {
     if( (/input|textarea/i).test(ele.tagName) ) {
-      console.debug('tapHandleFocus', ele.tagName);
+      console.debug('tapHandleFocus', ele.tagName, ele.id);
       tapActiveElement(ele);
-      ele.focus();
+      ele.focus && ele.focus();
+      ele.value = ele.value;
+      if( tapEnabledTouchEvents ) {
+        tapTouchFocusedInput = ele;
+      }
     } else {
       tapFocusOutActive();
     }
@@ -274,6 +293,26 @@ function tapFocusOutActive() {
     ele.blur();
   }
   tapActiveElement(null);
+}
+
+function tapFocusIn(e) {
+  // Because a text input doesn't preventDefault (so the caret still works) there's a chance
+  // that it's mousedown event 300ms later will change the focus to another element after
+  // the keyboard shows up.
+
+  if( tapEnabledTouchEvents &&
+      ionic.tap.isTextInput( tapActiveElement() ) &&
+      ionic.tap.isTextInput(tapTouchFocusedInput) &&
+      tapTouchFocusedInput !== e.target ) {
+
+    // 1) The pointer is from touch events
+    // 2) There is an active element which is a text input
+    // 3) A text input was just set to be focused on by a touch event
+    // 4) A new focus has been set, however the target isn't the one the touch event wanted
+    console.debug('focusin', 'tapTouchFocusedInput', tapTouchFocusedInput.id)
+    tapTouchFocusedInput.focus();
+    tapTouchFocusedInput = null;
+  }
 }
 
 function tapFocusOut() {
