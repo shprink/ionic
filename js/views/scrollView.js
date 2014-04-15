@@ -665,54 +665,70 @@ ionic.views.Scroll = ionic.views.View.inherit({
     - The blinking cursor says in the input 300ms after the tap
     - Can hit the keyboard's "next" button to change focus to the next input
     - When flicking down a page, and a target was an input, it shouldn't focus and jank scrolling
+    - Do not show text caret of a focused input while scrolling, no matter what the target is
+    - After scrolling has come to a halt, previously focused input should be focused again
+    - Keyboard should stay up while scrolling and an input was focused
+    - Keyboard should not go away after scrolling stops and it focuses back on the previous focused input
     */
 
-    ionic.scroller = {
 
-      touchStart: function(e) {
-        if ( ionic.tap.ignoreScrollStart(e) ) {
-          return;
-        }
+    self.touchStart = function(e) {
+      if ( ionic.tap.ignoreScrollStart(e) ) {
+        return;
+      }
 
-        if( ionic.tap.isTextInput(e.target) ) {
-          // do not start if the target is a text input
-          // if there is a touchmove on this input, then we can start the scroll
-          self.__hasStarted = false
-          return;
-        }
+      if( ionic.tap.isTextInput(e.target) ) {
+        // do not start if the target is a text input
+        // if there is a touchmove on this input, then we can start the scroll
+        self.__hasStarted = false
+        return;
+      }
 
+      self.__hasCheckedClone = false;
+      self.__hasInputClone = false;
+      self.__hasStarted = true;
+      self.doTouchStart(e.touches, e.timeStamp);
+      e.preventDefault();
+    };
+
+    self.touchMove = function(e) {
+      if(e.defaultPrevented) {
+        return;
+      }
+
+      if( !self.__hasStarted && ionic.tap.isTextInput(e.target) ) {
+        // the target is a text input and scroll has started
+        // since the text input doesn't start on touchStart, do it here
         self.__hasStarted = true;
         self.doTouchStart(e.touches, e.timeStamp);
         e.preventDefault();
-      },
 
-      touchMove: function(e) {
-        if(e.defaultPrevented) {
-          return;
-        }
-
-        if( !self.__hasStarted && ionic.tap.isTextInput(e.target) ) {
-          // the target is a text input and scroll has started
-          // since the text input doesn't start on touchStart, do it here
-          self.__hasStarted = true;
-          self.doTouchStart(e.touches, e.timeStamp);
-          e.preventDefault();
-        } else {
-          self.doTouchMove(e.touches, e.timeStamp);
-        }
-      },
-
-      touchEnd: function(e) {
-        self.doTouchEnd(e.timeStamp);
-        self.__hasStarted = false;
+      } else {
+        ionic.tap.cloneFocusedInput(self.__container, self);
+        self.doTouchMove(e.touches, e.timeStamp);
       }
-
     };
 
+    self.touchEnd = function(e) {
+      self.doTouchEnd(e.timeStamp);
+      self.__hasStarted = false;
+
+      if( !self.__isDragging && !self.__isDecelerating && !self.__isAnimating ) {
+        ionic.tap.removeClonedInputs(self.__container, self);
+      }
+    };
+
+    self.options.orgScrollingComplete = self.options.scrollingComplete;
+    self.options.scrollingComplete = function() {
+      ionic.tap.removeClonedInputs(self.__container, self);
+      self.options.orgScrollingComplete();
+    };
+
+
     if ('ontouchstart' in window) {
-      container.addEventListener("touchstart", ionic.scroller.touchStart, false);
-      document.addEventListener("touchmove", ionic.scroller.touchMove, false);
-      document.addEventListener("touchend", ionic.scroller.touchEnd, false);
+      container.addEventListener("touchstart", self.touchStart, false);
+      document.addEventListener("touchmove", self.touchMove, false);
+      document.addEventListener("touchend", self.touchEnd, false);
 
     } else {
 

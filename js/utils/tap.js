@@ -91,6 +91,62 @@ ionic.tap = {
     return !!ele &&
            (ele.tagName == 'TEXTAREA' ||
            (ele.tagName == 'INPUT' && !(/range|file|submit|reset/i).test(ele.type)));
+  },
+
+  cloneFocusedInput: function(container, instance) {
+    if(instance.__hasCheckedClone) return;
+
+    instance.__hasCheckedClone = true;
+    instance.__hasInputClone = false;
+
+    var focusInputs = container.querySelectorAll(':focus');
+    var focusInput;
+    for(var x=0; x<focusInputs.length; x++) {
+      if( ionic.tap.isTextInput(focusInputs[x]) ) {
+        focusInput = focusInputs[x];
+        break;
+      }
+    }
+
+    if(focusInput) {
+      console.debug('cloneFocusedInput', focusInput.tagName, focusInput.id);
+
+      var clonedInput = focusInput.parentElement.querySelector('.cloned-text-input');
+      if(!clonedInput) {
+        clonedInput = document.createElement(focusInput.tagName);
+        clonedInput.type = focusInput.type;
+        clonedInput.value = focusInput.value;
+        clonedInput.className = 'cloned-text-input';
+        instance.__hasInputClone = true;
+
+        ionic.requestAnimationFrame(function(){
+          focusInput.parentElement.insertBefore(clonedInput, focusInput);
+          focusInput.classList.add('previous-input-focus');
+        });
+      }
+    }
+  },
+
+  removeClonedInputs: function(container, instance) {
+    instance.__hasCheckedClone = false;
+    instance.__hasInputClone = false;
+
+    ionic.requestAnimationFrame(function(){
+      var clonedInputs = container.querySelectorAll('.cloned-text-input');
+      var clonedInput;
+
+      console.debug('removeClonedInputs', clonedInputs.length);
+      for(var x=0; x<clonedInputs.length; x++) {
+        clonedInput = clonedInputs[x];
+        clonedInput.parentElement.removeChild( clonedInput );
+      }
+
+      var focusedInput = container.querySelector('.previous-input-focus');
+      if(focusedInput) {
+        focusedInput.classList.remove('previous-input-focus');
+        focusedInput.focus();
+      }
+    });
   }
 
 };

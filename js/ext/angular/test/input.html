@@ -19,6 +19,15 @@
       textarea:focus {
         background: yellow !important;
       }
+
+      input[type=text].cloned-text-input,
+      textarea.cloned-text-input {
+        background: red !important;
+      }
+
+      .previous-input-focus {
+        display: none !important;
+      }
     </style>
   </head>
   <body ng-controller="AppCtrl">
