@@ -24,6 +24,8 @@ describe('Ionic Tap', function() {
   - Keyboard should show up when tapping on a label which surrounds a text input
   - Keyboard should go away when text input is focused, then tapped outside of input
   - Keyboard should hide when tapping the virtual keyboard's "Done" or down arrow, but tapping
+  - Should be able to move an inputs text caret when its focused
+  - Should be able to move an inputs text caret when its focused, and is wrapped with a label
     the input again will bring up the keyboard again
   - Options dialog should show when tapping on a select
   - Options dialog should show when tapping on a label which surrounds a select (not working in Android 2.3)
@@ -58,7 +60,7 @@ describe('Ionic Tap', function() {
 
   */
 
-  it('Should trigger a labels child inputs click, but stop the labels end event', function() {
+  it('Should trigger a labels child inputs click, and should not stop the labels end event so Android allows text editing', function() {
     var e = {
       type: 'touchstart',
       target: {
@@ -84,7 +86,7 @@ describe('Ionic Tap', function() {
     expect( e.target.control.focused ).toBeDefined();
 
     expect( e.stoppedPropagation ).toBeUndefined();
-    expect( e.preventedDefault ).toBeDefined();
+    expect( e.preventedDefault ).toBeUndefined();
   });
 
   it('Should trigger a click for an element w/out a wrapping label', function() {
@@ -647,6 +649,31 @@ describe('Ionic Tap', function() {
     }
   });
 
+  it('Should get containing element of label when passed a label', function() {
+    var label = document.createElement('label');
+    expect( tapContainingElement(label).tagName ).toEqual('LABEL')
+  });
+
+  it('Should get containing element of div when passed a div and no parent label', function() {
+    var ele = document.createElement('div');
+    expect( tapContainingElement(ele).tagName ).toEqual('DIV')
+  });
+
+  it('Should get containing element of label when passed a labels child span', function() {
+    var label = document.createElement('label');
+    var span = document.createElement('span');
+    label.appendChild(span);
+    expect( tapContainingElement(span).tagName ).toEqual('LABEL')
+  });
+
+  it('Should not focus out on label element which has no child input', function() {
+    var label = document.createElement('label');
+    label.blur = function(){ this.hasBlurred=true; }
+    tapActiveElement(label);
+    tapFocusOutActive(label);
+    expect( label.hasBlurred ).toBeUndefined();
+  });
+
   it('Should not prevent scrolling', function() {
     var target = document.createElement('div');
     var e = {
@@ -748,22 +775,17 @@ describe('Ionic Tap', function() {
     expect( ionic.tap.ignoreScrollStart(e) ).toEqual(true);
   });
 
-  it('Should get target element from event', function() {
-    var e = {
-      target: document.createElement('div')
-    };
-    expect( tapTargetElement(e).tagName ).toEqual('DIV');
+  it('Should get target element from an element', function() {
+    var ele = document.createElement('div');
+    expect( tapTargetElement(ele).tagName ).toEqual('DIV');
   });
 
-  it('Should get labels input control from event target', function() {
+  it('Should get labels input control from label element', function() {
     var label = document.createElement('label');
     var input = document.createElement('input');
     label.appendChild(input);
 
-    var e = {
-      target: label
-    };
-    expect( tapTargetElement(e).tagName ).toEqual('INPUT');
+    expect( tapTargetElement(label).tagName ).toEqual('INPUT');
   });
 
   it('Should get button target even if it has children from es target', function() {
@@ -771,10 +793,7 @@ describe('Ionic Tap', function() {
     var span = document.createElement('span');
     button.appendChild(span);
 
-    var e = {
-      target: button
-    };
-    expect( tapTargetElement(e, null).tagName ).toEqual('BUTTON');
+    expect( tapTargetElement(button).tagName ).toEqual('BUTTON');
   });
 
   it('Should isTextInput', function() {

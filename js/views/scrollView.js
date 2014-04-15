@@ -710,19 +710,25 @@ ionic.views.Scroll = ionic.views.View.inherit({
         return;
       }
 
-      var currentCoordinates = getPointerCoordinates(e);
+      if(self.startCoordinates) {
+        // we have start coordinates, so get this touch move's current coordinates
+        var currentCoordinates = getPointerCoordinates(e);
 
-      if( self.__isSelectable &&
-          ionic.tap.isTextInput(e.target) &&
-          self.startCoordinates &&
-          Math.abs(self.startCoordinates.x - currentCoordinates.x) > 25 ) {
-        self.__enableScrollY = false;
-        self.__isSelectable = true;
-      }
+        if( self.__isSelectable &&
+            ionic.tap.isTextInput(e.target) &&
+            Math.abs(self.startCoordinates.x - currentCoordinates.x) > 20 ) {
+          // user slid the text input's caret on its x axis, disable any future y scrolling
+          self.__enableScrollY = false;
+          self.__isSelectable = true;
+        }
 
-      if( self.__enableScrollY && self.startCoordinates && Math.abs(self.startCoordinates.y - currentCoordinates.y) > 10 ) {
-        self.__isSelectable = false;
-        ionic.tap.cloneFocusedInput(self.__container);
+        if( self.__enableScrollY && Math.abs(self.startCoordinates.y - currentCoordinates.y) > 10 ) {
+          // user scrolled the entire view on the y axis
+          // disabled being able to select text on an input
+          // hide the input which has focus, and show a cloned one that doesn't have focus
+          self.__isSelectable = false;
+          ionic.tap.cloneFocusedInput(self.__container);
+        }
       }
 
       self.doTouchMove(e.touches, e.timeStamp);

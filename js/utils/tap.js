@@ -147,7 +147,8 @@ function tapEventListener(type, enable, useCapture) {
 
 function tapClick(e) {
   // simulate a normal click by running the element's click method then focus on it
-  var ele = tapTargetElement(e);
+  var container = tapContainingElement(e.target);
+  var ele = tapTargetElement(container);
 
   if( tapRequiresNativeClick(ele) || tapPointerMoved ) return false;
 
@@ -158,11 +159,6 @@ function tapClick(e) {
 
   // if it's an input, focus in on the target, otherwise blur
   tapHandleFocus(ele);
-
-  if(e.target.tagName == 'LABEL') {
-    console.debug('label preventDefault');
-    e.preventDefault();
-  }
 }
 
 function triggerMouseEvent(type, ele, x, y) {
@@ -393,9 +389,17 @@ function getPointerCoordinates(event) {
   return c;
 }
 
-function tapTargetElement(e) {
-  var ele = e.target;
+function tapContainingElement(ele) {
+  var climbEle = ele;
+  for(var x=0; x<6; x++) {
+    if(!climbEle) break;
+    if(climbEle.tagName === 'LABEL') return climbEle;
+    climbEle = ele.parentElement;
+  }
+  return ele;
+}
 
+function tapTargetElement(ele) {
   if(ele && ele.tagName === 'LABEL') {
     if(ele.control) return ele.control;
 
