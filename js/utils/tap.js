@@ -90,62 +90,52 @@ ionic.tap = {
   isTextInput: function(ele) {
     return !!ele &&
            (ele.tagName == 'TEXTAREA' ||
-           (ele.tagName == 'INPUT' && !(/range|file|submit|reset/i).test(ele.type)));
+           (ele.tagName == 'INPUT' && !(/radio|checkbox|range|file|submit|reset/i).test(ele.type)));
   },
 
   cloneFocusedInput: function(container, instance) {
-    if(instance.__hasCheckedClone) return;
+    if(ionic.tap.hasCheckedClone) return;
+    ionic.tap.hasCheckedClone = true;
 
-    instance.__hasCheckedClone = true;
-    instance.__hasInputClone = false;
+    ionic.requestAnimationFrame(function(){
+      var focusInput = container.querySelector(':focus');
+      if( ionic.tap.isTextInput(focusInput) ) {
+        console.debug('cloneFocusedInput', focusInput.tagName, focusInput.id);
 
-    var focusInputs = container.querySelectorAll(':focus');
-    var focusInput;
-    for(var x=0; x<focusInputs.length; x++) {
-      if( ionic.tap.isTextInput(focusInputs[x]) ) {
-        focusInput = focusInputs[x];
-        break;
-      }
-    }
-
-    if(focusInput) {
-      console.debug('cloneFocusedInput', focusInput.tagName, focusInput.id);
-
-      var clonedInput = focusInput.parentElement.querySelector('.cloned-text-input');
-      if(!clonedInput) {
-        clonedInput = document.createElement(focusInput.tagName);
-        clonedInput.type = focusInput.type;
-        clonedInput.value = focusInput.value;
-        clonedInput.className = 'cloned-text-input';
-        instance.__hasInputClone = true;
-
-        ionic.requestAnimationFrame(function(){
+        var clonedInput = focusInput.parentElement.querySelector('.cloned-text-input');
+        if(!clonedInput) {
+          clonedInput = document.createElement(focusInput.tagName);
+          clonedInput.type = focusInput.type;
+          clonedInput.value = focusInput.value;
+          clonedInput.className = 'cloned-text-input';
           focusInput.parentElement.insertBefore(clonedInput, focusInput);
           focusInput.classList.add('previous-input-focus');
-        });
+          return true;
+        }
       }
-    }
+    });
   },
 
-  removeClonedInputs: function(container, instance) {
-    instance.__hasCheckedClone = false;
-    instance.__hasInputClone = false;
+  hasCheckedClone: false,
+  removeCloneTimer: null,
+
+  removeClonedInputs: function(container) {
+    ionic.tap.hasCheckedClone = false;
 
     ionic.requestAnimationFrame(function(){
       var clonedInputs = container.querySelectorAll('.cloned-text-input');
-      var clonedInput;
 
-      console.debug('removeClonedInputs', clonedInputs.length);
       for(var x=0; x<clonedInputs.length; x++) {
-        clonedInput = clonedInputs[x];
-        clonedInput.parentElement.removeChild( clonedInput );
+        clonedInputs[x].parentElement.removeChild( clonedInputs[x] );
       }
 
-      var focusedInput = container.querySelector('.previous-input-focus');
-      if(focusedInput) {
-        focusedInput.classList.remove('previous-input-focus');
-        focusedInput.focus();
+      var previousInputFocus = container.querySelectorAll('.previous-input-focus');
+      for(var x=0; x<previousInputFocus.length; x++) {
+        previousInputFocus[x].classList.remove('previous-input-focus');
       }
+
+      console.debug('removeClonedInputs', clonedInputs.length, previousInputFocus.length);
+      ionic.tap.hasInputClone = false;
     });
   }
 

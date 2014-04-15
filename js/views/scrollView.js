@@ -669,6 +669,9 @@ ionic.views.Scroll = ionic.views.View.inherit({
     - After scrolling has come to a halt, previously focused input should be focused again
     - Keyboard should stay up while scrolling and an input was focused
     - Keyboard should not go away after scrolling stops and it focuses back on the previous focused input
+    - Should not create clones for tap inputs, like checkboxes, radio buttons, select, range
+    - Focus on an input, flick up, let go, and during animation flick down, and clone should still go away
+    - During an animating scroll, tap a different input and clone should go away and change focus
     */
 
 
@@ -680,12 +683,10 @@ ionic.views.Scroll = ionic.views.View.inherit({
       if( ionic.tap.isTextInput(e.target) ) {
         // do not start if the target is a text input
         // if there is a touchmove on this input, then we can start the scroll
-        self.__hasStarted = false
+        self.__hasStarted = false;
         return;
       }
 
-      self.__hasCheckedClone = false;
-      self.__hasInputClone = false;
       self.__hasStarted = true;
       self.doTouchStart(e.touches, e.timeStamp);
       e.preventDefault();
@@ -704,7 +705,12 @@ ionic.views.Scroll = ionic.views.View.inherit({
         e.preventDefault();
 
       } else {
-        ionic.tap.cloneFocusedInput(self.__container, self);
+        if( ionic.tap.cloneFocusedInput(self.__container) ) {
+          setTimeout(function(){
+            if(self.__isDecelerating) return;
+            ionic.tap.removeClonedInputs(container);
+          }, 1500);
+        }
         self.doTouchMove(e.touches, e.timeStamp);
       }
     };
@@ -714,13 +720,13 @@ ionic.views.Scroll = ionic.views.View.inherit({
       self.__hasStarted = false;
 
       if( !self.__isDragging && !self.__isDecelerating && !self.__isAnimating ) {
-        ionic.tap.removeClonedInputs(self.__container, self);
+        ionic.tap.removeClonedInputs(self.__container);
       }
     };
 
     self.options.orgScrollingComplete = self.options.scrollingComplete;
     self.options.scrollingComplete = function() {
-      ionic.tap.removeClonedInputs(self.__container, self);
+      ionic.tap.removeClonedInputs(self.__container);
       self.options.orgScrollingComplete();
     };
 

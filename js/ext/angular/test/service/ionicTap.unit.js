@@ -806,6 +806,15 @@ describe('Ionic Tap', function() {
 
     ele.type = 'reset';
     expect( ionic.tap.isTextInput(ele) ).toEqual(false);
+
+    ele.type = 'radio';
+    expect( ionic.tap.isTextInput(ele) ).toEqual(false);
+
+    ele.type = 'checkbox';
+    expect( ionic.tap.isTextInput(ele) ).toEqual(false);
+
+    ele = document.createElement('select');
+    expect( ionic.tap.isTextInput(ele) ).toEqual(false);
   });
 
   it('Should reset focus to tapTouchFocusedInput if the active element changed from mousedown', function() {
