@@ -180,7 +180,7 @@ function tapClickGateKeeper(e) {
 }
 
 function tapRequiresNativeClick(ele) {
-  if(!ele || ele.disabled || ele.type === 'range' || ele.type === 'file' || ele.tagName === 'VIDEO' || ele.tagName === 'OBJECT' ) {
+  if(!ele || ele.disabled || (/file|range/i).test(ele.type) || (/object|video/i).test(ele.tagName) ) {
     return true;
   }
   if(ele.nodeType === 1) {
@@ -197,8 +197,7 @@ function tapRequiresNativeClick(ele) {
 
 // MOUSE
 function tapMouseDown(e) {
-  if(e.isIonicTap || e.isTapHandled) return;
-  e.isTapHandled = true;
+  if(e.isIonicTap || isTapHandled(e)) return;
 
   if(tapEnabledTouchEvents) {
     console.debug('mousedown', 'stop event');
@@ -223,8 +222,7 @@ function tapMouseDown(e) {
 }
 
 function tapMouseUp(e) {
-  if(e.isTapHandled) return;
-  e.isTapHandled = true;
+  if( isTapHandled(e) ) return;
 
   if( !tapHasPointerMoved(e) ) {
     tapClick(e);
@@ -246,8 +244,8 @@ function tapMouseMove(e) {
 
 // TOUCH
 function tapTouchStart(e) {
-  if(e.isTapHandled) return;
-  e.isTapHandled = true;
+  if( isTapHandled(e) ) return;
+
   tapPointerMoved = false;
 
   tapEnableTouchEvents();
@@ -258,8 +256,7 @@ function tapTouchStart(e) {
 }
 
 function tapTouchEnd(e) {
-  if(e.isTapHandled) return;
-  e.isTapHandled = true;
+  if( isTapHandled(e) ) return;
 
   tapEnableTouchEvents();
   if( !tapHasPointerMoved(e) ) {
@@ -297,6 +294,11 @@ function tapEnableTouchEvents() {
 function tapResetMouseEvent() {
   tapEventListener('mouseup', false);
   tapEnabledTouchEvents = false;
+}
+
+function isTapHandled(e) {
+  if(e.isTapHandled) return true;
+  e.isTapHandled = true;
 }
 
 function tapHandleFocus(ele) {
