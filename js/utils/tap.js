@@ -100,8 +100,6 @@ ionic.tap = {
     ionic.requestAnimationFrame(function(){
       var focusInput = container.querySelector(':focus');
       if( ionic.tap.isTextInput(focusInput) ) {
-        console.debug('cloneFocusedInput', focusInput.tagName, focusInput.id);
-
         var clonedInput = focusInput.parentElement.querySelector('.cloned-text-input');
         if(!clonedInput) {
           clonedInput = document.createElement(focusInput.tagName);
@@ -134,9 +132,6 @@ ionic.tap = {
         previousInputFocus[x].classList.remove('previous-input-focus');
         previousInputFocus[x].focus();
       }
-
-      console.debug('removeClonedInputs', clonedInputs.length, previousInputFocus.length);
-      ionic.tap.hasInputClone = false;
     });
   }
 

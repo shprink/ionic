@@ -721,9 +721,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
       }
 
       if( self.__enableScrollY && self.startCoordinates && Math.abs(self.startCoordinates.y - currentCoordinates.y) > 10 ) {
-        console.debug('scroll touchMove');
         self.__isSelectable = false;
-
         ionic.tap.cloneFocusedInput(self.__container);
       }
 
