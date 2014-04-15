@@ -68,10 +68,6 @@ ionic.tap = {
     tapEventListener('focusin');
     tapEventListener('focusout');
 
-    ionic.requestAnimationFrame(function(){
-      document.body.classList.add('tap-enabled');
-    });
-
     return function() {
       for(var type in tapEventListeners) {
         tapEventListener(type, false);
