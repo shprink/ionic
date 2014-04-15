@@ -137,6 +137,13 @@ body.grade-c {
   }
 }
 
+.cloned-text-input + input,
+.cloned-text-input + textarea {
+  position: absolute;
+  left: -9999px;
+  width: 200px;
+}
+
 @keyframes refresh-spin {
   0% { transform: translate3d(0,0,0) rotate(0); }
   100% { transform: translate3d(0,0,0) rotate(-180deg); }

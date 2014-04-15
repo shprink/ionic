@@ -715,7 +715,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
       if( self.__isSelectable &&
           ionic.tap.isTextInput(e.target) &&
           self.startCoordinates &&
-          Math.abs(self.startCoordinates.x - currentCoordinates.x) > 15 ) {
+          Math.abs(self.startCoordinates.x - currentCoordinates.x) > 25 ) {
         self.__enableScrollY = false;
         self.__isSelectable = true;
       }
