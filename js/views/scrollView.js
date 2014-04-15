@@ -676,6 +676,8 @@ ionic.views.Scroll = ionic.views.View.inherit({
 
 
     self.touchStart = function(e) {
+      self.startCoordinates = getPointerCoordinates(e);
+
       if ( ionic.tap.ignoreScrollStart(e) ) {
         return;
       }
@@ -687,6 +689,8 @@ ionic.views.Scroll = ionic.views.View.inherit({
         return;
       }
 
+      self.__isSelectable = true;
+      self.__enableScrollY = true;
       self.__hasStarted = true;
       self.doTouchStart(e.touches, e.timeStamp);
       e.preventDefault();
@@ -703,21 +707,34 @@ ionic.views.Scroll = ionic.views.View.inherit({
         self.__hasStarted = true;
         self.doTouchStart(e.touches, e.timeStamp);
         e.preventDefault();
-
-      } else {
-        if( ionic.tap.cloneFocusedInput(self.__container) ) {
-          setTimeout(function(){
-            if(self.__isDecelerating) return;
-            ionic.tap.removeClonedInputs(container);
-          }, 1500);
-        }
-        self.doTouchMove(e.touches, e.timeStamp);
+        return;
       }
+
+      var currentCoordinates = getPointerCoordinates(e);
+
+      if( self.__isSelectable &&
+          ionic.tap.isTextInput(e.target) &&
+          self.startCoordinates &&
+          Math.abs(self.startCoordinates.x - currentCoordinates.x) > 15 ) {
+        self.__enableScrollY = false;
+        self.__isSelectable = true;
+      }
+
+      if( self.__enableScrollY && self.startCoordinates && Math.abs(self.startCoordinates.y - currentCoordinates.y) > 10 ) {
+        console.debug('scroll touchMove');
+        self.__isSelectable = false;
+
+        ionic.tap.cloneFocusedInput(self.__container);
+      }
+
+      self.doTouchMove(e.touches, e.timeStamp);
     };
 
     self.touchEnd = function(e) {
       self.doTouchEnd(e.timeStamp);
       self.__hasStarted = false;
+      self.__isSelectable = true;
+      self.__enableScrollY = true;
 
       if( !self.__isDragging && !self.__isDecelerating && !self.__isAnimating ) {
         ionic.tap.removeClonedInputs(self.__container);
@@ -735,6 +752,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
       container.addEventListener("touchstart", self.touchStart, false);
       document.addEventListener("touchmove", self.touchMove, false);
       document.addEventListener("touchend", self.touchEnd, false);
+      document.addEventListener("touchcancel", self.touchEnd, false);
 
     } else {
 
