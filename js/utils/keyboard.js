@@ -13,42 +13,79 @@ function androidKeyboardFix() {
   var rememberedDeviceWidth = window.innerWidth;
   var rememberedDeviceHeight = window.innerHeight;
   var keyboardHeight;
- 
+  var rememberedActiveEl;
+  var alreadyOpen = false;
 
-  window.addEventListener('resize', resize);
+  if (ionic.Platform.isWebView() && window.cordova && cordova.plugins && cordova.plugins.Keyboard){
+    window.addEventListener('native.showkeyboard', resizeOnKeyboardShow);
+    window.addEventListener('native.hidekeyboard', resizeOnKeyboardHide);
+  }
+  else {
+    window.addEventListener('resize', resizeWebWorld);
+    window.addEventListener('focusin', fixScrollTop);
+  }
 
-  function resize() {
+  function fixScrollTop(e){
+    if (e.srcElement.tagName == 'INPUT' || e.srcElement.tagName == 'TEXTAREA' || e.srcElement.isContentEditable){
+      //setTimeout(function(){
+        document.body.scrollTop = 0;
+      //});
+    }
+  }
+
+  function resizeWebWorld() {
 
     //If the width of the window changes, we have an orientation change
     if (rememberedDeviceWidth !== window.innerWidth) {
       rememberedDeviceWidth = window.innerWidth;
       rememberedDeviceHeight = window.innerHeight;
-      console.info('orientation change. deviceWidth =', rememberedDeviceWidth, ', deviceHeight =', rememberedDeviceHeight);
+
 
     //If the height changes, and it's less than before, we have a keyboard open
     } else if (rememberedDeviceHeight !== window.innerHeight &&
                window.innerHeight < rememberedDeviceHeight) {
       document.body.classList.add('footer-hide');
-      //Wait for next frame so document.activeElement is set
-      ionic.requestAnimationFrame(handleKeyboardChange);
+
+      keyboardHeight = rememberedDeviceHeight - window.innerHeight;
+      setTimeout(function(){
+      ionic.trigger('scrollChildIntoView', {
+          target: document.activeElement
+        }, true);
+      }, 100);
     } else {
       //Otherwise we have a keyboard close or a *really* weird resize
       document.body.classList.remove('footer-hide');
     }
+  }
 
-    function handleKeyboardChange() {
-      //keyboard opens
-      keyboardHeight = rememberedDeviceHeight - window.innerHeight;
-      var activeEl = document.activeElement;
-      if (activeEl) {
-        //This event is caught by the nearest parent scrollView
-        //of the activeElement
+  function resizeOnKeyboardShow(e){
+    rememberedActiveEl = document.activeElement;
+    if (rememberedActiveEl) {
+      //This event is caught by the nearest parent scrollView
+      //of the activeElement
+      if (cordova.plugins.Keyboard.isVisible){
+        document.body.classList.add('footer-hide');
         ionic.trigger('scrollChildIntoView', {
-          target: activeEl
+          keyboardHeight: e.keyboardHeight,
+          target: rememberedActiveEl,
+          firstKeyboardShow: !alreadyOpen
+        }, true);
+        if (!alreadyOpen) alreadyOpen = true;
+      }
+    }
+  }
+
+  function resizeOnKeyboardHide(){
+    //wait to see if we're just switching inputs
+    setTimeout(function(){
+      if (!cordova.plugins.Keyboard.isVisible){
+        document.body.classList.remove('footer-hide');
+        alreadyOpen = false;
+        ionic.trigger('resetScrollView', {
+          target: rememberedActiveEl
         }, true);
       }
-
-    }
+    }, 100);
   }
 }
  

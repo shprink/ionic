@@ -601,7 +601,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
       var deviceHeight = window.innerHeight;
 
       var frameHeight;
-      if (parseFloat(device.version) >= 7.0){
+      if ((window.device && parseFloat(device.version) >= 7.0) || (!ionic.Platform.isWebView() && ionic.Platform.isAndroid())){
         frameHeight = deviceHeight;
       }
       else {
