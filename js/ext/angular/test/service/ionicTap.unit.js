@@ -22,6 +22,7 @@ describe('Ionic Tap', function() {
   ---------------------------------
   - Keyboard should show up when tapping on a text input
   - Keyboard should show up when tapping on a label which surrounds a text input
+  - Keyboard should stay up if focused text input is tapped again
   - Keyboard should go away when text input is focused, then tapped outside of input
   - Keyboard should hide when tapping the virtual keyboard's "Done" or down arrow, but tapping
   - Should be able to move an inputs text caret when its focused
@@ -513,9 +514,9 @@ describe('Ionic Tap', function() {
     expect( tapRequiresNativeClick( div5 ) ).toEqual(true);
   });
 
-  it('Should not allow a click that has an input target but not created by tapClick', function() {
+  it('Should not allow a click that has an textarea target but not created by tapClick', function() {
     var e = {
-      target: document.createElement('input'),
+      target: document.createElement('textarea'),
       stopPropagation: function(){ this.stoppedPropagation = true },
       preventDefault: function(){ this.preventedDefault = true }
     };
@@ -548,6 +549,45 @@ describe('Ionic Tap', function() {
     tapClickGateKeeper(e);
 
     expect( e.stoppedPropagation ).toBeUndefined();
+    expect( e.preventedDefault ).toBeUndefined();
+  });
+
+  it('Should stopPropagation but not preventDefault on native label click that wraps text input', function() {
+    // Android requires preventDefault to not be fired when a label wraps an input
+    // so that when the label is tapped it brings up the keyboard
+    var e = {
+      target: document.createElement('label'),
+      stopPropagation: function(){ this.stoppedPropagation = true },
+      preventDefault: function(){ this.preventedDefault = true }
+    };
+
+    var input = document.createElement('textarea');
+    e.target.appendChild(input);
+
+    tapClickGateKeeper(e);
+
+    expect( e.stoppedPropagation ).toBeDefined();
+    expect( e.preventedDefault ).toBeUndefined();
+  });
+
+  it('Should stopPropagation but not preventDefault on native span click inside a label that wraps text input', function() {
+    var label = document.createElement('label');
+    var span = document.createElement('span');
+    var textarea = document.createElement('textarea');
+
+    label.appendChild(span);
+    label.appendChild(textarea);
+
+    var e = {
+      target: span,
+      stopPropagation: function(){ this.stoppedPropagation = true },
+      preventDefault: function(){ this.preventedDefault = true }
+    };
+
+
+    tapClickGateKeeper(e);
+
+    expect( e.stoppedPropagation ).toBeDefined();
     expect( e.preventedDefault ).toBeUndefined();
   });
 
@@ -664,6 +704,13 @@ describe('Ionic Tap', function() {
     var span = document.createElement('span');
     label.appendChild(span);
     expect( tapContainingElement(span).tagName ).toEqual('LABEL')
+  });
+
+  it('Should not return itself if no parent containing label and arg allowSelf=false', function() {
+    var div = document.createElement('div');
+    var span = document.createElement('span');
+    div.appendChild(span);
+    expect( tapContainingElement(span, false) ).toBeUndefined();
   });
 
   it('Should not focus out on label element which has no child input', function() {

@@ -93,6 +93,13 @@ ionic.tap = {
            (ele.tagName == 'INPUT' && !(/radio|checkbox|range|file|submit|reset/i).test(ele.type)));
   },
 
+  isLabelWithInput: function(ele) {
+    var container = tapContainingElement(ele, false);
+
+    return container &&
+           ionic.tap.isTextInput( tapTargetElement( container ) );
+  },
+
   cloneFocusedInput: function(container, instance) {
     if(ionic.tap.hasCheckedClone) return;
     ionic.tap.hasCheckedClone = true;
@@ -174,7 +181,11 @@ function tapClickGateKeeper(e) {
   if( !e.isIonicTap && !tapRequiresNativeClick(e.target) ) {
     console.debug('clickPrevent', e.target.tagName);
     e.stopPropagation();
-    e.preventDefault();
+
+    if( !ionic.tap.isLabelWithInput(e.target) ) {
+      // labels clicks from native should not preventDefault othersize keyboard will not show on input focus
+      e.preventDefault();
+    }
     return false;
   }
 }
@@ -349,7 +360,7 @@ function tapFocusIn(e) {
     // 2) There is an active element which is a text input
     // 3) A text input was just set to be focused on by a touch event
     // 4) A new focus has been set, however the target isn't the one the touch event wanted
-    console.debug('focusin', 'tapTouchFocusedInput', tapTouchFocusedInput.id)
+    console.debug('focusin', 'tapTouchFocusedInput', tapTouchFocusedInput.id);
     tapTouchFocusedInput.focus();
     tapTouchFocusedInput = null;
   }
@@ -391,14 +402,14 @@ function getPointerCoordinates(event) {
   return c;
 }
 
-function tapContainingElement(ele) {
+function tapContainingElement(ele, allowSelf) {
   var climbEle = ele;
   for(var x=0; x<6; x++) {
     if(!climbEle) break;
     if(climbEle.tagName === 'LABEL') return climbEle;
     climbEle = ele.parentElement;
   }
-  return ele;
+  if(allowSelf !== false) return ele;
 }
 
 function tapTargetElement(ele) {
