@@ -604,7 +604,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
       var deviceHeight = window.innerHeight;
 
       var frameHeight;
-      if ((window.device && parseFloat(device.version) >= 7.0) || (!ionic.Platform.isWebView() && ionic.Platform.isAndroid())){
+      if (ionic.Platform.isIOS() && ionic.Platform.version() >= 7.0  || (!ionic.Platform.isWebView() && ionic.Platform.isAndroid())){
         frameHeight = deviceHeight;
       }
       else {
@@ -613,7 +613,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
 
       var element = e.target;
 
-      //getBoundingClientRect() will actually give us position relative to the viewport
+      //getBoundingClientRect() will give us position relative to the viewport
       var elementDeviceBottom = element.getBoundingClientRect().bottom;
 
       if (e.detail.firstKeyboardShow){
@@ -653,9 +653,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
     container.addEventListener('resetScrollView', function(e) {
       //return scrollview to original height once keyboard has hidden
       container.style.height = "";
-      setTimeout(function(){
-        self.resize();
-      }, 48)
+      self.resize();
     });
 
 
