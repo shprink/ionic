@@ -72,6 +72,7 @@ describe('Ionic Tap', function() {
   - While inputs are actively scrolling you should not be able to change focus
   - If you touchstart on a text input, then scrolland touchend, it should not bring up the keyboard
   - If you touchstart on a label wrapping a text input, then scroll and touchend, it should not bring up the keyboard
+  - When focused in a text input, be able to get out when tapping a checkbox
 
   Tested on:
   ----------------------------
@@ -204,7 +205,7 @@ describe('Ionic Tap', function() {
 
   it('Should set tapHasPointerMoved=false on tapTouchStart', function() {
     tapPointerMoved = null;
-    tapTouchStart({});
+    tapTouchStart({ preventDefault:function(){} });
     expect( tapPointerMoved ).toEqual(false);
   });
 
@@ -216,7 +217,7 @@ describe('Ionic Tap', function() {
 
   it('Should set tapHasPointerMoved=true on tapTouchMove', function() {
     tapPointerMoved = null;
-    tapTouchStart({ clientX: 100, clientY: 100 });
+    tapTouchStart({ clientX: 100, clientY: 100, preventDefault:function(){} });
     expect( tapPointerMoved ).toEqual(false);
     tapTouchMove({ clientX: 200, clientY: 100 });
     expect( tapPointerMoved ).toEqual(true);
@@ -255,7 +256,7 @@ describe('Ionic Tap', function() {
       preventDefault: function() { e.preventedDefault = true }
     };
 
-    tapTouchStart({clientX: 100, clientY: 100});
+    tapTouchStart({clientX: 100, clientY: 100, preventDefault:function(){}});
     tapTouchEnd(e);
 
     expect( e.target.dispatchedEvent ).toBeDefined();
@@ -276,7 +277,7 @@ describe('Ionic Tap', function() {
 
     expect( e.target.dispatchedEvent ).toBeUndefined();
 
-    tapTouchStart({clientX: 200, clientY: 100});
+    tapTouchStart({clientX: 200, clientY: 100, preventDefault:function(){}});
 
     tapTouchEnd(e);
 
@@ -285,7 +286,7 @@ describe('Ionic Tap', function() {
 
   it('Should tapEnabledTouchEvents because of touchstart', function() {
     tapEnabledTouchEvents = false;
-    tapTouchStart({});
+    tapTouchStart({preventDefault:function(){}});
     tapEnabledTouchEvents = true;
   });
 
@@ -295,7 +296,7 @@ describe('Ionic Tap', function() {
   });
 
   it('Should cancel click when touchmove coordinates goes too far from touchstart coordinates', function() {
-    var e = { clientX: 100, clientY: 100 };
+    var e = { clientX: 100, clientY: 100, preventDefault:function(){} };
     tapTouchStart(e);
 
     expect( tapTouchMove({ clientX: 102, clientY: 100 }) ).toBeUndefined();
@@ -308,7 +309,8 @@ describe('Ionic Tap', function() {
   it('Should cancel click when touchend coordinates are too far from touchstart coordinates', function() {
     var e = {
       clientX: 100, clientY: 100,
-      dispatchEvent: function(){ this.dispatchedEvent = true; }
+      dispatchEvent: function(){ this.dispatchedEvent = true; },
+      preventDefault:function(){}
     };
     tapTouchStart(e);
     tapTouchEnd({ clientX: 200, clientY: 100 })

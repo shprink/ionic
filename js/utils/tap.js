@@ -13,6 +13,7 @@
  - After XXms, bring back the mouse event listeners incase they switch from touch and mouse
  - If no touch events and only mouse, then touch events never fire, only mouse
  - Triggering clicks with mouse events work the same as touch, except with mousedown/mouseup
+ - Tapping inputs is disabled during scrolling
 
  - Does not require other libraries to hook into ionic.tap, it just works
  - Elements can come and go from the DOM and it doesn't have to keep adding and removing listeners
@@ -127,14 +128,12 @@ ionic.tap = {
 
     ionic.requestAnimationFrame(function(){
       var clonedInputs = container.querySelectorAll('.cloned-text-input');
+      var previousInputFocus = container.querySelectorAll('.previous-input-focus');
 
       for(var x=0; x<clonedInputs.length; x++) {
         clonedInputs[x].parentElement.removeChild( clonedInputs[x] );
       }
-    });
 
-    ionic.requestAnimationFrame(function(){
-      var previousInputFocus = container.querySelectorAll('.previous-input-focus');
       for(var x=0; x<previousInputFocus.length; x++) {
         previousInputFocus[x].classList.remove('previous-input-focus');
         previousInputFocus[x].focus();
@@ -255,21 +254,29 @@ function tapMouseMove(e) {
 
 // TOUCH
 function tapTouchStart(e) {
+  console.debug('tapTouchStart 1');
   if( tapIgnoreEvent(e) ) return;
+  console.debug('tapTouchStart 2');
 
   tapPointerMoved = false;
 
   tapEnableTouchEvents();
   tapPointerStart = getPointerCoordinates(e);
+  console.debug('tapTouchStart', tapPointerStart.x, tapPointerStart.y);
 
   tapEventListener('touchmove');
   ionic.activator.start(e);
+
+  // iOS can preventDefault here and keyboards still show up
+  // if the default isn't prevented on iOS an ugly flicker appears
+  if(ionic.Platform.isIOS()) e.preventDefault();
 }
 
 function tapTouchEnd(e) {
   if( tapIgnoreEvent(e) ) return;
 
   tapEnableTouchEvents();
+  console.debug('touchEnd', getPointerCoordinates(e).x, getPointerCoordinates(e).y);
   if( !tapHasPointerMoved(e) ) {
     tapClick(e);
   }
@@ -312,6 +319,7 @@ function tapIgnoreEvent(e) {
   e.isTapHandled = true;
 
   if( ionic.scroll.isScrolling ) {
+    console.debug('tapIgnoreEvent isScrolling');
     e.preventDefault();
     return true;
   }
@@ -369,6 +377,7 @@ function tapFocusIn(e) {
     tapTouchFocusedInput.focus();
     tapTouchFocusedInput = null;
   }
+  ionic.scroll.isScrolling = false;
 }
 
 function tapFocusOut() {
