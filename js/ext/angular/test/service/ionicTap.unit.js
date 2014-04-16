@@ -53,11 +53,36 @@ describe('Ionic Tap', function() {
   - An element or one of its parents with data-tap-disabled attribute should still click, but w/ a delay
   - ALL THE ABOVE, BUT NOW WITH NG-CLICK ON THE INPUT!
   - Tapping a div with an click event added should fire one click
+  - Tapping an img with an click event added should fire one click
+  - Can scroll when target is a text input, but it does not have focus
+  - Can scroll when the target is a text input and it already has focus
+  - Can hold a text input and move its text caret/cursor
+  - Can scroll when the target is a label
+  - Does not change focus 300ms after when tapping an input and the keyboard shows up
+  - The blinking cursor says in the input 300ms after the tap
+  - Can hit the keyboard's "next" button to change focus to the next input
+  - When flicking down a page, and a target was an input, it shouldn't focus and jank scrolling
+  - Do not show text caret of a focused input while scrolling, no matter what the target is
+  - After scrolling has come to a halt, previously focused input should be focused again
+  - Keyboard should stay up while scrolling if an input was focused
+  - Keyboard should not go away after scrolling stops and it focuses back on the previous focused input
+  - Should not create clones for tap inputs to hide cursor, like for checkboxes, radio, range, select
+  - Focus on an input, flick up, let go, and during animation flick down, and clone should go away
+  - While inputs are actively scrolling you should not be able to change focus
 
   Tested on:
   ----------------------------
-  - iOS6 iPad 3
-  - iOS7 iPhone 5
+  - iOS 6.1 iPad 3
+  - iOS 7.0 iPhone 4
+  - iOS 7.0 iPhone 5
+  - iOS 7.1 iPhone 5
+  - Android 2.3 HTC Incredible
+  - Android 2.3 Samsung Galaxy S
+  - Android 4.0 HTC Incredible
+  - Android 4.2 Nexus 4
+  - Android 4.3 Samsung S3
+  - Android 4.4 Motorola Moto G
+  - Android 4.4 Nexus 5
 
   */
 
