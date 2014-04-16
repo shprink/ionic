@@ -384,26 +384,25 @@ ionic.views.Scroll = ionic.views.View.inherit({
       isScrolling: false,
 
       onScroll: function() {
-        if(ionic.scroll.isScrolling) {
-          clearTimeout(ionic.scroll.endTimer);
-          ionic.scroll.endTimer = setTimeout(ionic.scroll.setScrollStop, 32);
-        } else {
-          ionic.scroll.startTimer = setTimeout(ionic.scroll.setScrollStart, 32);
+        if(!ionic.scroll.isScrolling) {
+          setTimeout(ionic.scroll.setScrollStart, 64);
         }
+        clearTimeout(ionic.scroll.endTimer);
+        ionic.scroll.endTimer = setTimeout(ionic.scroll.setScrollStop, 64);
       },
 
       setScrollStart: function() {
-        ionic.scroll.isScrolling = true;
+        ionic.scroll.isScrolling = Math.abs(ionic.scroll.lastTop - self.__scrollTop) > 4;
       },
 
       setScrollStop: function() {
         ionic.scroll.isScrolling = false;
+        ionic.scroll.lastTop = self.__scrollTop;
       },
 
       startTimer: null,
       endTimer: null,
-      lastTop: 0,
-      lastLeft: 0
+      lastTop: 0
     };
 
     this.triggerScrollEvent = ionic.throttle(function() {
