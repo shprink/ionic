@@ -266,10 +266,6 @@ function tapTouchStart(e) {
 
   tapEventListener('touchmove');
   ionic.activator.start(e);
-
-  // iOS can preventDefault here and keyboards still show up
-  // if the default isn't prevented on iOS an ugly flicker appears
-  if(ionic.Platform.isIOS()) e.preventDefault();
 }
 
 function tapTouchEnd(e) {
