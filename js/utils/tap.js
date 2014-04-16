@@ -254,15 +254,12 @@ function tapMouseMove(e) {
 
 // TOUCH
 function tapTouchStart(e) {
-  console.debug('tapTouchStart 1');
   if( tapIgnoreEvent(e) ) return;
-  console.debug('tapTouchStart 2');
 
   tapPointerMoved = false;
 
   tapEnableTouchEvents();
   tapPointerStart = getPointerCoordinates(e);
-  console.debug('tapTouchStart', tapPointerStart.x, tapPointerStart.y);
 
   tapEventListener('touchmove');
   ionic.activator.start(e);
@@ -272,7 +269,6 @@ function tapTouchEnd(e) {
   if( tapIgnoreEvent(e) ) return;
 
   tapEnableTouchEvents();
-  console.debug('touchEnd', getPointerCoordinates(e).x, getPointerCoordinates(e).y);
   if( !tapHasPointerMoved(e) ) {
     tapClick(e);
   }
@@ -290,7 +286,6 @@ function tapTouchMove(e) {
 }
 
 function tapTouchCancel(e) {
-  console.debug('tapTouchCancel')
   tapEventListener('touchmove', false);
   ionic.activator.end();
   tapPointerMoved = false;
@@ -315,7 +310,6 @@ function tapIgnoreEvent(e) {
   e.isTapHandled = true;
 
   if( ionic.scroll.isScrolling ) {
-    console.debug('tapIgnoreEvent isScrolling');
     e.preventDefault();
     return true;
   }
@@ -369,7 +363,7 @@ function tapFocusIn(e) {
     // 2) There is an active element which is a text input
     // 3) A text input was just set to be focused on by a touch event
     // 4) A new focus has been set, however the target isn't the one the touch event wanted
-    console.debug('focusin', 'tapTouchFocusedInput', tapTouchFocusedInput.id);
+    console.debug('focusin', 'tapTouchFocusedInput');
     tapTouchFocusedInput.focus();
     tapTouchFocusedInput = null;
   }

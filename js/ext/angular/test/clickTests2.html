@@ -13,6 +13,9 @@
     outline: none;
     -webkit-user-select: none;
   }
+  div {
+    background-color: #eee;
+  }
   input {
     -webkit-user-select: auto;
   }
@@ -132,7 +135,7 @@
     <input type="file" style="width: 100px">
   </div>
 
-  <div data-tap-disabled="true">
+  <div data-tap-disabled="true" style="display:none">
     <leaflet id="map" events="events" center="center" testing="no-testing" markers="markers" defaults="defaults" style="width:80px; height:100px; right: 0; top: 170px; position:absolute; overflow:hidden;"></leaflet>
   </div>
 
