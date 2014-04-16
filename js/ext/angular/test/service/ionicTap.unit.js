@@ -9,6 +9,7 @@ describe('Ionic Tap', function() {
     _activeElement = null; // the element which has focus
 
     deregisterTap = ionic.tap.register(document.createElement('div'));
+    ionic.scroll = { isScrolling: false };
   });
 
   afterEach(function(){
@@ -69,6 +70,8 @@ describe('Ionic Tap', function() {
   - Should not create clones for tap inputs to hide cursor, like for checkboxes, radio, range, select
   - Focus on an input, flick up, let go, and during animation flick down, and clone should go away
   - While inputs are actively scrolling you should not be able to change focus
+  - If you touchstart on a text input, then scrolland touchend, it should not bring up the keyboard
+  - If you touchstart on a label wrapping a text input, then scroll and touchend, it should not bring up the keyboard
 
   Tested on:
   ----------------------------
@@ -76,6 +79,7 @@ describe('Ionic Tap', function() {
   - iOS 7.0 iPhone 4
   - iOS 7.0 iPhone 5
   - iOS 7.1 iPhone 5
+  - iOS 7.1 Simulator
   - Android 2.3 HTC Incredible
   - Android 2.3 Samsung Galaxy S
   - Android 4.0 HTC Incredible
@@ -83,6 +87,9 @@ describe('Ionic Tap', function() {
   - Android 4.3 Samsung S3
   - Android 4.4 Motorola Moto G
   - Android 4.4 Nexus 5
+  - OSX Chrome
+  - OSX Chrome (emulated touch screen)
+  - OSX Firefox
 
   */
 
@@ -926,6 +933,27 @@ describe('Ionic Tap', function() {
 
     expect( tapFocusedEle.hasFocus ).toEqual(true);
     expect( tapTouchFocusedInput ).toEqual(null);
+  });
+
+  it('Should tapIgnoreEvent false', function(){
+    var e = {};
+    expect( tapIgnoreEvent(e) ).toBeUndefined();
+  });
+
+  it('Should tapIgnoreEvent true because e.isTapHandled', function(){
+    var e = {
+      isTapHandled: true
+    };
+    expect( tapIgnoreEvent(e) ).toEqual(true);
+  });
+
+  it('Should tapIgnoreEvent true because ionic.scroll.isScrolling', function(){
+    var e = {
+      preventDefault: function(){ this.preventedDefault=true }
+    };
+    ionic.scroll.isScrolling = true;
+    expect( tapIgnoreEvent(e) ).toEqual(true);
+    expect( e.preventedDefault ).toEqual(true);
   });
 
 });

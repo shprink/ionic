@@ -178,7 +178,7 @@ function triggerMouseEvent(type, ele, x, y) {
 
 function tapClickGateKeeper(e) {
   // do not allow through any click events that were not created by ionic.tap
-  if( !e.isIonicTap && !tapRequiresNativeClick(e.target) ) {
+  if( ionic.scroll.isScrolling || !e.isIonicTap && !tapRequiresNativeClick(e.target) ) {
     console.debug('clickPrevent', e.target.tagName);
     e.stopPropagation();
 
@@ -208,7 +208,7 @@ function tapRequiresNativeClick(ele) {
 
 // MOUSE
 function tapMouseDown(e) {
-  if(e.isIonicTap || isTapHandled(e)) return;
+  if(e.isIonicTap || tapIgnoreEvent(e)) return;
 
   if(tapEnabledTouchEvents) {
     console.debug('mousedown', 'stop event');
@@ -233,7 +233,7 @@ function tapMouseDown(e) {
 }
 
 function tapMouseUp(e) {
-  if( isTapHandled(e) ) return;
+  if( tapIgnoreEvent(e) ) return;
 
   if( !tapHasPointerMoved(e) ) {
     tapClick(e);
@@ -255,7 +255,7 @@ function tapMouseMove(e) {
 
 // TOUCH
 function tapTouchStart(e) {
-  if( isTapHandled(e) ) return;
+  if( tapIgnoreEvent(e) ) return;
 
   tapPointerMoved = false;
 
@@ -267,7 +267,7 @@ function tapTouchStart(e) {
 }
 
 function tapTouchEnd(e) {
-  if( isTapHandled(e) ) return;
+  if( tapIgnoreEvent(e) ) return;
 
   tapEnableTouchEvents();
   if( !tapHasPointerMoved(e) ) {
@@ -307,9 +307,14 @@ function tapResetMouseEvent() {
   tapEnabledTouchEvents = false;
 }
 
-function isTapHandled(e) {
+function tapIgnoreEvent(e) {
   if(e.isTapHandled) return true;
   e.isTapHandled = true;
+
+  if( ionic.scroll.isScrolling ) {
+    e.preventDefault();
+    return true;
+  }
 }
 
 function tapHandleFocus(ele) {

@@ -380,7 +380,22 @@ ionic.views.Scroll = ionic.views.View.inherit({
       self.resize();
     }, 1000, true);
 
+    ionic.scroll = {
+      isScrolling: false,
+
+      setIsScrolling: function(enable) {
+        ionic.scroll.isScrolling = (enable === true);
+      },
+
+      scrollTimer: null
+    };
+
     this.triggerScrollEvent = ionic.throttle(function() {
+
+      ionic.scroll.setIsScrolling(true);
+      clearTimeout(ionic.scroll.scrollTimer);
+      ionic.scroll.scrollTimer = setTimeout(ionic.scroll.setIsScrolling, 32);
+
       ionic.trigger('scroll', {
         scrollTop: self.__scrollTop,
         scrollLeft: self.__scrollLeft,
@@ -655,25 +670,6 @@ ionic.views.Scroll = ionic.views.View.inherit({
       }, 48)
     });
 
-    /*
-    - Can scroll when target is a text input, but it does not have focus
-    - Can tap on a text input and focus
-    - Can scroll when the target is a text input and it already has focus
-    - Can hold a text input and move its text caret/cursor
-    - Can scroll when the target is a label
-    - Does not change focus 300ms after when tapping an input and the keyboard shows up
-    - The blinking cursor says in the input 300ms after the tap
-    - Can hit the keyboard's "next" button to change focus to the next input
-    - When flicking down a page, and a target was an input, it shouldn't focus and jank scrolling
-    - Do not show text caret of a focused input while scrolling, no matter what the target is
-    - After scrolling has come to a halt, previously focused input should be focused again
-    - Keyboard should stay up while scrolling and an input was focused
-    - Keyboard should not go away after scrolling stops and it focuses back on the previous focused input
-    - Should not create clones for tap inputs, like checkboxes, radio buttons, select, range
-    - Focus on an input, flick up, let go, and during animation flick down, and clone should still go away
-    - During an animating scroll, tap a different input and clone should go away and change focus
-    */
-
 
     self.touchStart = function(e) {
       self.startCoordinates = getPointerCoordinates(e);
@@ -701,7 +697,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
         return;
       }
 
-      if( !self.__hasStarted && (ionic.tap.isTextInput(e.target) || ionic.tap.isLabelWithInput(e.target)) ) {
+      if( !self.__hasStarted && ( (ionic.tap.isTextInput(e.target) || ionic.tap.isLabelWithInput(e.target)) ) ) {
         // the target is a text input and scroll has started
         // since the text input doesn't start on touchStart, do it here
         self.__hasStarted = true;
