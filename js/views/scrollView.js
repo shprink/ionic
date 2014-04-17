@@ -380,9 +380,31 @@ ionic.views.Scroll = ionic.views.View.inherit({
       self.resize();
     }, 1000, true);
 
+    this.onScroll = function(scrollTop) {
+
+      if(!ionic.scroll.isScrolling) {
+        setTimeout(self.setScrollStart, 50);
+      } else {
+        clearTimeout(self.scrollTimer);
+        self.scrollTimer = setTimeout(self.setScrollStop, 80);
+      }
+
+    };
+
+    this.setScrollStart = function() {
+      ionic.scroll.isScrolling = Math.abs(ionic.scroll.lastTop - self.__scrollTop) > 1;
+      clearTimeout(self.scrollTimer);
+      self.scrollTimer = setTimeout(self.setScrollStop, 80);
+    };
+
+    this.setScrollStop = function() {
+      ionic.scroll.isScrolling = false;
+      ionic.scroll.lastTop = self.__scrollTop;
+    };
+
     this.triggerScrollEvent = ionic.throttle(function() {
 
-      ionic.scroll.onScroll(self.__scrollTop);
+      self.onScroll();
 
       ionic.trigger('scroll', {
         scrollTop: self.__scrollTop,
@@ -2174,27 +2196,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
 });
 
 ionic.scroll = {
-
-  onScroll: function(scrollTop) {
-
-    if(!ionic.scroll.isScrolling) {
-      setTimeout(function(){
-        ionic.scroll.isScrolling = Math.abs(ionic.scroll.lastTop - scrollTop) > 0;
-        console.debug('start', ionic.scroll.isScrolling, Math.abs(ionic.scroll.lastTop - scrollTop));
-      }, 32);
-    }
-
-    clearTimeout(ionic.scroll.endTimer);
-    ionic.scroll.endTimer = setTimeout(function(){
-      ionic.scroll.isScrolling = false;
-      ionic.scroll.lastTop = scrollTop;
-      console.debug('-stop', ionic.scroll.isScrolling);
-    }, 64);
-
-  },
-
   isScrolling: false,
-  endTimer: null,
   lastTop: 0
 };
 
