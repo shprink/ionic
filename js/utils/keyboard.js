@@ -34,9 +34,7 @@ function keyboardInit(window) {
 function keyboardElementFocusIn(e) {
   if( !e.target || !ionic.tap.isTextInput(e.target) ) return;
 
-  if( ionic.tap.containsOrIsTextInput(e.target) || e.target.isContentEditable ){
-    document.body.scrollTop = 0;
-  }
+  document.body.scrollTop = 0;
 
   keyboardActiveElement = e.target;
 
