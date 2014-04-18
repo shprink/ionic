@@ -27,6 +27,7 @@ describe('Ionic Keyboard', function() {
     ionic.Platform.platforms = null;
     ionic.Platform.setPlatform('');
     ionic.Platform.setVersion('');
+    ionic.keyboard.isOpen(false);
   }));
 
   afterEach(function(){
