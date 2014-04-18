@@ -623,22 +623,14 @@ ionic.views.Scroll = ionic.views.View.inherit({
     //See js/utils/keyboard.js
     container.addEventListener('scrollChildIntoView', function(e) {
       var keyboardHeight = e.detail.keyboardHeight || 0;
-      var deviceHeight = window.innerHeight;
-
-      var frameHeight;
-      if (ionic.Platform.isIOS() && ionic.Platform.version() >= 7.0  || (!ionic.Platform.isWebView() && ionic.Platform.isAndroid())){
-        frameHeight = deviceHeight;
-      }
-      else {
-        frameHeight = deviceHeight - keyboardHeight;
-      }
-
+      var elementBottom = e.detail.elementBottom || 0;
+      var elementTop = e.detail.elementTop || 0;
+      var frameHeight = e.detail.frameHeight || 0;
+      var keyboardTopOffset = e.detail.keyboardTopOffset || 0;
+      var elementUnderKeyboard = e.detail.elementUnderKeyboard;
       var element = e.target;
 
-      //getBoundingClientRect() will give us position relative to the viewport
-      var elementDeviceBottom = element.getBoundingClientRect().bottom;
-
-      if (e.detail.firstKeyboardShow){
+      if(e.detail.doResize){
         //shrink scrollview so we can actually scroll if the input is hidden
         //if it isn't shrink so we can scroll to inputs under the keyboard
         container.style.height = (container.clientHeight - keyboardHeight) + "px";
@@ -649,12 +641,10 @@ ionic.views.Scroll = ionic.views.View.inherit({
       }
 
       //If the element is positioned under the keyboard...
-      if (elementDeviceBottom > frameHeight) {
+      if(elementUnderKeyboard) {
         //Put element in middle of visible screen
         //Wait for resize() to reset scroll position
         setTimeout(function(){
-          //distance from top of input to the top of the keyboard
-          var keyboardTopOffset = element.getBoundingClientRect().top - frameHeight;
           //middle of the scrollview, where we want to scroll to
           var scrollViewMidpointOffset = container.clientHeight * 0.5;
           var scrollOffset = keyboardTopOffset + scrollViewMidpointOffset;
@@ -665,6 +655,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
           setTimeout(function(){
             element.value = element.value; //thanks @adambradley 1337h4x
           }, 600);
+
         }, 32);
       }
 

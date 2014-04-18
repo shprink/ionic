@@ -241,6 +241,12 @@ function tapMouseDown(e) {
 }
 
 function tapMouseUp(e) {
+  if(tapEnabledTouchEvents) {
+    e.stopPropagation();
+    e.preventDefault();
+    return false;
+  }
+
   if( tapIgnoreEvent(e) ) return;
 
   if( !tapHasPointerMoved(e) ) {
@@ -283,6 +289,12 @@ function tapTouchEnd(e) {
   }
 
   tapTouchCancel();
+
+  if( ionic.tap.isLabelWithTextInput(e.target) ) {
+    // if the tapped element is a label, which has a child input
+    // then prevent the default so iOS doesn't auto scroll to the input
+    e.preventDefault();
+  }
 }
 
 function tapTouchMove(e) {
@@ -301,17 +313,11 @@ function tapTouchCancel(e) {
 }
 
 function tapEnableTouchEvents() {
-  if(!tapEnabledTouchEvents) {
-    tapEventListener('mouseup', false);
-    tapEnabledTouchEvents = true;
-  }
+  tapEnabledTouchEvents = true;
   clearTimeout(tapMouseResetTimer);
-  tapMouseResetTimer = setTimeout(tapResetMouseEvent, 2500);
-}
-
-function tapResetMouseEvent() {
-  tapEventListener('mouseup', false);
-  tapEnabledTouchEvents = false;
+  tapMouseResetTimer = setTimeout(function(){
+    tapEnabledTouchEvents = false;
+  }, 2000);
 }
 
 function tapIgnoreEvent(e) {

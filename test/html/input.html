@@ -233,6 +233,11 @@
       var timeId;
       var consoleDebug = console.debug;
 
+      function getTime() {
+        var d = new Date();
+        return d.getMilliseconds();
+      }
+
       console.debug = function() {
         index++;
         var msg = [];
@@ -240,6 +245,7 @@
         for (var i = 0, j = arguments.length; i < j; i++){
           msg.push(arguments[i]);
         }
+        msg.push(getTime());
 
         msg = msg.join(', ');
 

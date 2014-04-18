@@ -250,6 +250,28 @@ describe('Ionic Tap', function() {
     expect( tapPointerMoved ).toEqual(true);
   });
 
+  it('Should stop event on mouseup if touch is enabled', function() {
+    tapEnabledTouchEvents = true;
+    var e = {
+      stopPropagation: function() { this.stoppedPropagation = true; },
+      preventDefault: function() { this.preventedDefault = true; }
+    }
+    tapMouseUp(e);
+    expect( e.stoppedPropagation ).toEqual(true);
+    expect( e.preventedDefault ).toEqual(true);
+  });
+
+  it('Should not stop event on mouseup if touch is not enabled', function() {
+    tapEnabledTouchEvents = false;
+    e = {
+      stopPropagation: function() { this.stoppedPropagation = true; },
+      preventDefault: function() { this.preventedDefault = true; }
+    }
+    tapMouseUp(e);
+    expect( e.stoppedPropagation ).toBeUndefined();
+    expect( e.preventedDefault ).toBeUndefined();
+  });
+
   it('Should trigger click on touchend and nearby touchstart happened', function() {
     var e = {
       type: 'touchend',
