@@ -42,16 +42,20 @@ function keyboardElementFocusIn(e) {
 }
 
 function keyboardElementFocusOut(e) {
+  ionic.keyboard.IsOpen(false);
   //wait to see if we're just switching inputs
   setTimeout(function() {
-    if(ionic.keyboard.IsOpen()) {
+    if(!ionic.keyboard.IsOpen()) {
       keyboardHide();
     }
+    keyboardUpdateDeviceHeight();
   }, 100);
 }
 
 function keyboardUpdateDeviceHeight(e) {
-  keyboardDeviceHeight = window.innerHeight;
+  if ( !ionic.keyboard.isOpen() ){
+    keyboardDeviceHeight = window.innerHeight; 
+  }
 }
 
 function keyboardGetHeight() {
@@ -120,7 +124,6 @@ function keyboardShow(element, elementTop, elementBottom, deviceHeight, keyboard
 }
 
 function keyboardHide() {
-  ionic.keyboard.isOpen = false;
   ionic.trigger('resetScrollView', {
     target: keyboardActiveElement
   }, true);
