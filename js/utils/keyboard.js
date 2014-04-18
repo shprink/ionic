@@ -7,12 +7,18 @@ IONIC KEYBOARD
 
 var keyboardDeviceHeight;
 var keyboardActiveElement;
+var keyboardIsOpen;
 
 var DEFAULT_KEYBOARD_HEIGHT = 260;
 var KEYBOARD_OPEN_CSS = 'keyboard-open'
 
 ionic.keyboard = {
-  isOpen: false
+  isOpen: function(value){
+    if ( arguments.length ){
+      keyboardIsOpen = !!value;
+    }
+    return keyboardIsOpen;
+  }
 };
 
 function keyboardInit(window) {
@@ -40,7 +46,7 @@ function keyboardElementFocusIn(e) {
 function keyboardElementFocusOut(e) {
   //wait to see if we're just switching inputs
   setTimeout(function() {
-    if(!cordova.plugins.Keyboard.isVisible) {
+    if(ionic.keyboard.IsOpen()) {
       keyboardHide();
     }
   }, 100);
