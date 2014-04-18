@@ -19,7 +19,7 @@ function keyboardInit(window) {
   keyboardDeviceHeight = window.innerHeight;
 
   window.addEventListener('ionic.focusin', keyboardElementFocusIn);
-  window.addEventListener('ionic.focusout', keyboardElementFocusOut);
+  window.addEventListener('focusout', keyboardElementFocusOut);
   window.addEventListener('orientationchange', keyboardUpdateDeviceHeight);
 }
 
