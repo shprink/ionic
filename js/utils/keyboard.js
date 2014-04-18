@@ -5,7 +5,6 @@ IONIC KEYBOARD
 
 */
 
-var keyboardDeviceWidth;
 var keyboardDeviceHeight;
 var keyboardActiveElement;
 
@@ -17,11 +16,11 @@ ionic.keyboard = {
 };
 
 function keyboardInit(window) {
-  keyboardDeviceWidth = window.innerWidth;
   keyboardDeviceHeight = window.innerHeight;
 
   window.addEventListener('ionic.focusin', keyboardElementFocusIn);
   window.addEventListener('ionic.focusout', keyboardElementFocusOut);
+  window.addEventListener('orientationchange', keyboardUpdateDeviceHeight);
 }
 
 function keyboardElementFocusIn(e) {
@@ -45,6 +44,10 @@ function keyboardElementFocusOut(e) {
       keyboardHide();
     }
   }, 100);
+}
+
+function keyboardUpdateDeviceHeight(e) {
+  keyboardDeviceHeight = window.innerHeight;
 }
 
 function getKeyboardHeight() {
