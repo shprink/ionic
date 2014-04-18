@@ -86,8 +86,5 @@ describe('Ionic Keyboard', function() {
     expect( keyboardHasPlugin() ).toEqual(true);
   });
 
-  it('Should get keyboardDefaultHeight', function() {
-    expect( keyboardDefaultHeight() ).toEqual(260);
-  });
 
 });
