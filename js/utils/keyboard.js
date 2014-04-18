@@ -39,8 +39,6 @@ function keyboardElementFocusIn(e) {
   var elementBoundingRect = e.target.getBoundingClientRect();
 
   keyboardShow(e.target, elementBoundingRect.top, elementBoundingRect.bottom, keyboardDeviceHeight, keyboardHeight);
-
-  document.body.classList.add(KEYBOARD_OPEN_CSS);
 }
 
 function keyboardElementFocusOut(e) {
@@ -139,10 +137,6 @@ function keyboardIsOverWebView() {
 
 function keyboardHasPlugin() {
   return !!(window.cordova && cordova.plugins && cordova.plugins.Keyboard);
-}
-
-function keyboardDefaultHeight() {
-  return DEFAULT_KEYBOARD_HEIGHT;
 }
 
 ionic.Platform.ready(function() {
