@@ -35,7 +35,7 @@ function keyboardElementFocusIn(e) {
   document.body.scrollTop = 0;
 
   keyboardActiveElement = e.target;
-  var keyboardHeight = getKeyboardHeight();
+  var keyboardHeight = keyboardGetHeight(); 
   var elementBoundingRect = e.target.getBoundingClientRect();
 
   keyboardShow(e.target, elementBoundingRect.top, elementBoundingRect.bottom, keyboardDeviceHeight, keyboardHeight);
@@ -54,7 +54,7 @@ function keyboardUpdateDeviceHeight(e) {
   keyboardDeviceHeight = window.innerHeight;
 }
 
-function getKeyboardHeight() {
+function keyboardGetHeight() {
   // check if we are using the keyboard plugin
   if ( window.cordova && cordova.plugins && cordova.plugins.Keyboard 
       && cordova.plugins.Keyboard.height ){
