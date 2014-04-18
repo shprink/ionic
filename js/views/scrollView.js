@@ -623,12 +623,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
     //See js/utils/keyboard.js
     container.addEventListener('scrollChildIntoView', function(e) {
       var keyboardHeight = e.detail.keyboardHeight || 0;
-      var elementBottom = e.detail.elementBottom || 0;
-      var elementTop = e.detail.elementTop || 0;
-      var frameHeight = e.detail.frameHeight || 0;
       var keyboardTopOffset = e.detail.keyboardTopOffset || 0;
-      var elementUnderKeyboard = e.detail.elementUnderKeyboard;
-      var element = e.target;
 
       if(e.detail.doResize){
         //shrink scrollview so we can actually scroll if the input is hidden
@@ -641,7 +636,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
       }
 
       //If the element is positioned under the keyboard...
-      if(elementUnderKeyboard) {
+      if( e.detail.isElementUnderKeyboard ) {
         //Put element in middle of visible screen
         //Wait for resize() to reset scroll position
         setTimeout(function(){
@@ -653,7 +648,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
           //please someone tell me there's a better way to do this
           //wait until input is scrolled into view, then fix focus
           setTimeout(function(){
-            element.value = element.value; //thanks @adambradley 1337h4x
+            e.target.value = e.target.value; //thanks @adambradley 1337h4x
           }, 600);
 
         }, 32);

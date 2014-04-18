@@ -20,7 +20,7 @@ function keyboardInit(window) {
   keyboardDeviceWidth = window.innerWidth;
   keyboardDeviceHeight = window.innerHeight;
 
-  window.addEventListener('focusin', keyboardElementFocusIn);
+  window.addEventListener('ionic.focusin', keyboardElementFocusIn);
 
   if( keyboardHasPlugin() ) {
     window.addEventListener('native.showkeyboard', keyboardPluginShow);
@@ -31,15 +31,16 @@ function keyboardInit(window) {
   }
 }
 
-
 function keyboardElementFocusIn(e) {
-  if (ionic.tap.containsOrIsTextInput(e.target) || e.target.isContentEditable){
+  if( !e.target || !ionic.tap.isTextInput(e.target) ) return;
+
+  if( ionic.tap.containsOrIsTextInput(e.target) || e.target.isContentEditable ){
     document.body.scrollTop = 0;
   }
 
   keyboardActiveElement = e.target;
 
-  if( !keyboardHasPlugin() ) {
+  if( !keyboardHasPlugin() || !e.target.getBoundingClientRect ) {
     // only run this if the keyboard plugin doesn't exist
     // it will figure out a default keyboard height when sent a null keyboard height
     var elementBoundingRect = e.target.getBoundingClientRect();
