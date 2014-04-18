@@ -21,14 +21,7 @@ function keyboardInit(window) {
   keyboardDeviceHeight = window.innerHeight;
 
   window.addEventListener('ionic.focusin', keyboardElementFocusIn);
-
-  if( keyboardHasPlugin() ) {
-    window.addEventListener('native.showkeyboard', keyboardPluginShow);
-    window.addEventListener('native.hidekeyboard', keyboardPluginHide);
-
-  } else if (ionic.Platform.isAndroid()){
-    window.addEventListener('resize', keyboardBrowserResize);
-  }
+  window.addEventListener('ionic.focusout', keyboardElementFocusOut);
 }
 
 function keyboardElementFocusIn(e) {
@@ -37,54 +30,41 @@ function keyboardElementFocusIn(e) {
   document.body.scrollTop = 0;
 
   keyboardActiveElement = e.target;
+  var keyboardHeight = getKeyboardHeight();
+  var elementBoundingRect = e.target.getBoundingClientRect();
 
-  if( !keyboardHasPlugin() || !e.target.getBoundingClientRect ) {
-    // only run this if the keyboard plugin doesn't exist
-    // it will figure out a default keyboard height when sent a null keyboard height
-    var elementBoundingRect = e.target.getBoundingClientRect();
-    keyboardShow(e.target, elementBoundingRect.top, elementBoundingRect.bottom, keyboardDeviceHeight, null);
-  }
+  keyboardShow(e.target, elementBoundingRect.top, elementBoundingRect.bottom, keyboardDeviceHeight, keyboardHeight);
+
+  document.body.classList.add(KEYBOARD_OPEN_CSS);
 }
 
-function keyboardBrowserResize() {
-  if(keyboardDeviceWidth !== window.innerWidth) {
-    // If the width of the window changes, we have an orientation change
-    keyboardDeviceWidth = window.innerWidth;
-    keyboardDeviceHeight = window.innerHeight;
-
-  } else if(keyboardDeviceHeight !== window.innerHeight &&
-             window.innerHeight < keyboardDeviceHeight) {
-    // If the height changes, and it's less than before, we have a keyboard open
-    document.body.classList.add(KEYBOARD_OPEN_CSS);
-
-    var keyboardHeight = keyboardDeviceHeight - window.innerHeight;
-    setTimeout(function() {
-      ionic.trigger('scrollChildIntoView', {
-        target: keyboardActiveElement,
-      }, true);
-    }, 100);
-
-  } else {
-    // Otherwise we have a keyboard close or a *really* weird resize
-    document.body.classList.remove(KEYBOARD_OPEN_CSS);
-  }
-}
-
-function keyboardPluginShow(e) {
-  if(keyboardActiveElement && cordova.plugins.Keyboard.isVisible) {
-
-    var elementBoundingRect = e.target.getBoundingClientRect();
-    keyboardShow(keyboardActiveElement, elementBoundingRect.top, elementBoundingRect.bottom, keyboardDeviceHeight, e.keyboardHeight);
-  }
-}
-
-function keyboardPluginHide() {
-  // wait to see if we're just switching inputs
+function keyboardElementFocusOut(e) {
+  //wait to see if we're just switching inputs
   setTimeout(function() {
     if(!cordova.plugins.Keyboard.isVisible) {
       keyboardHide();
     }
   }, 100);
+}
+
+function getKeyboardHeight() {
+  // check if we are using the keyboard plugin
+  if ( window.cordova && cordova.plugins && cordova.plugins.Keyboard 
+      && cordova.plugins.Keyboard.height ){
+    
+    return cordova.plugins.Keyboard.height;
+  }
+ 
+  // Not using the plugin, so try and determine the height of the keyboard by
+  // the difference in the window height
+  if( keyboardDeviceHeight !== window.innerHeight &&
+             window.innerHeight < keyboardDeviceHeight ) {
+
+    return keyboardDeviceHeight - window.innerHeight;
+  }
+
+  // otherwise fall back to just guessing
+  return DEFAULT_KEYBOARD_HEIGHT;
 }
 
 function keyboardShow(element, elementTop, elementBottom, deviceHeight, keyboardHeight) {
