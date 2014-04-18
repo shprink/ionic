@@ -953,6 +953,14 @@ describe('Ionic Tap', function() {
 
     ele = document.createElement('select');
     expect( ionic.tap.isTextInput(ele) ).toEqual(false);
+
+    ele = document.createElement('div');
+    ele.setAttribute('contenteditable', true);
+    expect( ionic.tap.isTextInput(ele) ).toEqual(true);
+
+    ele = document.createElement('div');
+    ele.setAttribute('contenteditable', false);
+    expect( ionic.tap.isTextInput(ele) ).toEqual(false);
   });
 
   it('Should isLabelWithTextInput', function() {
