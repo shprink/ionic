@@ -27,7 +27,7 @@ describe('Ionic Keyboard', function() {
     ionic.Platform.platforms = null;
     ionic.Platform.setPlatform('');
     ionic.Platform.setVersion('');
-    ionic.keyboard.isOpen(false);
+    ionic.keyboard.isOpen = false;
   }));
 
   afterEach(function(){
@@ -55,22 +55,22 @@ describe('Ionic Keyboard', function() {
     expect( keyboardIsOverWebView() ).toEqual(true);
   });
 
-  it('Should keyboardIsOverWebView()=true if iOS 7.0 or greater', function(){
+  it('Should keyboardIsOverWebView()=false if iOS 7.0 or greater', function(){
     ionic.Platform.setPlatform('iOS');
     ionic.Platform.setVersion('7.0');
     expect( ionic.Platform.isAndroid() ).toEqual(false);
     expect( ionic.Platform.isIOS() ).toEqual(true);
 
-    expect( keyboardIsOverWebView() ).toEqual(true);
+    expect( keyboardIsOverWebView() ).toEqual(false);
   });
 
-  it('Should keyboardIsOverWebView()=false if less than iOS 7.0', function(){
+  it('Should keyboardIsOverWebView()=true if less than iOS 7.0', function(){
     ionic.Platform.setPlatform('iOS');
     ionic.Platform.setVersion('6.0');
     expect( ionic.Platform.isAndroid() ).toEqual(false);
     expect( ionic.Platform.isIOS() ).toEqual(true);
 
-    expect( keyboardIsOverWebView() ).toEqual(false);
+    expect( keyboardIsOverWebView() ).toEqual(true);
   });
 
   it('Should keyboardHasPlugin', function() {
@@ -102,7 +102,7 @@ describe('Ionic Keyboard', function() {
   });
 
   it('keyboardUpdateDeviceHeight() should update when ionic.keyboard.isOpen() is false', function(){
-    ionic.keyboard.isOpen(false);
+    ionic.keyboard.isOpen = false;
     window.innerHeight = 460;
     keyboardDeviceHeight = 320;
     keyboardUpdateDeviceHeight();
@@ -111,14 +111,12 @@ describe('Ionic Keyboard', function() {
   });
 
   it('keyboardUpdateDeviceHeight() should not update when ionic.keyboard.isOpen() is true', function(){
-    ionic.keyboard.isOpen(true);
+    ionic.keyboard.isOpen = true;
     window.innerHeight = 100;
     keyboardDeviceHeight = 320;
     keyboardUpdateDeviceHeight();
 
     expect( keyboardDeviceHeight ).toEqual(320);
   });
-
-
 
 });

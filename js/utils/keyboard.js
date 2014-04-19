@@ -13,16 +13,18 @@ var DEFAULT_KEYBOARD_HEIGHT = 260;
 var KEYBOARD_OPEN_CSS = 'keyboard-open'
 
 ionic.keyboard = {
-  isOpen: function(value){
-    if ( arguments.length ){
-      keyboardIsOpen = !!value;
-    }
-    return keyboardIsOpen;
-  }
+  isOpen: false,
+  height: null, 
+  alreadyOpen: false // when switching inputs, keyboard technically opens and closes
+                     // so need to check if it was already open to resize view or not
 };
 
 function keyboardInit(window) {
   keyboardDeviceHeight = window.innerHeight;
+
+  if( keyboardHasPlugin() ){
+    window.addEventListener('native.showkeyboard', keyboardUpdateHeight);
+  }
 
   window.addEventListener('ionic.focusin', keyboardElementFocusIn);
   window.addEventListener('focusout', keyboardElementFocusOut);
@@ -42,37 +44,52 @@ function keyboardElementFocusIn(e) {
 }
 
 function keyboardElementFocusOut(e) {
-  ionic.keyboard.IsOpen(false);
-  //wait to see if we're just switching inputs
+  ionic.keyboard.IsOpen = false;
+
+  // wait to see if we're just switching inputs
   setTimeout(function() {
-    if(!ionic.keyboard.IsOpen()) {
+
+    //keyboard still isn't open
+    if(!ionic.keyboard.IsOpen) {
       keyboardHide();
+
+      // if we change orientation when the keyboard is open, get device height
+      // once keyboard closes to get the proper value
+      keyboardUpdateDeviceHeight();
+
+      ionic.keyboard.alreadyOpen = false;
     }
-    keyboardUpdateDeviceHeight();
   }, 100);
 }
 
 function keyboardUpdateDeviceHeight(e) {
-  if ( !ionic.keyboard.isOpen() ){
+  if ( !ionic.keyboard.isOpen ){
     keyboardDeviceHeight = window.innerHeight; 
   }
 }
 
+function keyboardUpdateHeight(e){
+  ionic.keyboard.height = e.keyboardHeight || DEFAULT_KEYBOARD_HEIGHT;
+}
+
 function keyboardGetHeight() {
   // check if we are using the keyboard plugin
-  if ( window.cordova && cordova.plugins && cordova.plugins.Keyboard 
-      && cordova.plugins.Keyboard.height ){
-    
-    return cordova.plugins.Keyboard.height;
+  if ( keyboardHasPlugin() ){
+    return ionic.keyboard.height; 
   }
  
   // Not using the plugin, so try and determine the height of the keyboard by
-  // the difference in the window height
+  // the difference in window height
   if( keyboardDeviceHeight !== window.innerHeight &&
              window.innerHeight < keyboardDeviceHeight ) {
 
-    return keyboardDeviceHeight - window.innerHeight;
+    ionic.keyboard.height = keyboardDeviceHeight - window.innerHeight;
+
+    return ionic.keyboard.height;
   }
+
+  //for whatever reason window size has not changed, use old value
+  if (ionic.keyboard.height !== null) return ionic.keyboard.height;
 
   // otherwise fall back to just guessing
   return DEFAULT_KEYBOARD_HEIGHT;
@@ -83,14 +100,14 @@ function keyboardShow(element, elementTop, elementBottom, deviceHeight, keyboard
     target: element,
     elementTop: elementTop,
     elementBottom: elementBottom,
-    firstKeyboardShow: !ionic.keyboard.isOpen
+    firstKeyboardShow: !ionic.keyboard.alreadyOpen,
+    keyboardHeight: keyboardHeight
   };
 
-  if(!keyboardHeight || keyboardHeight < 100) {
-    // given a unknown or bad keyboard height, use a default
-    keyboardHeight = keyboardDefaultHeight();
+  if(!keyboardHeight) {
+    keyboardHeight = keyboardGetHeight(); 
+    details.keyboardHeight = keyboardHeight;
   }
-  details.keyboardHeight = keyboardHeight;
 
   if( keyboardIsOverWebView() ) {
     // keyboard is over the view
@@ -104,16 +121,17 @@ function keyboardShow(element, elementTop, elementBottom, deviceHeight, keyboard
   details.keyboardTopOffset = (details.elementTop - details.frameHeight);
 
   // figure out if the element is under the keyboard
-  details.isElementUnderKeyboard = (details.elementDeviceBottom > details.frameHeight);
+  details.isElementUnderKeyboard = (details.elementBottom > details.frameHeight);
 
   // the scrollview should resize if the keyboard isn't already open
-  details.doResize = (!ionic.keyboard.isOpen && details.isElementUnderKeyboard);
-
+  details.doResize = (!ionic.keyboard.alreadyOpen && details.isElementUnderKeyboard);
+ 
   // send event so the scroll view adjusts
   if(details.isElementUnderKeyboard) {
     ionic.trigger('scrollChildIntoView', details, true);
   }
 
+  if(!ionic.keyboard.alreadyOpen) ionic.keyboard.alreadyOpen = true;
   if(!ionic.keyboard.isOpen) ionic.keyboard.isOpen = true;
 
   ionic.requestAnimationFrame(function(){
@@ -134,7 +152,7 @@ function keyboardHide() {
 }
 
 function keyboardIsOverWebView() {
-  return ( ionic.Platform.isIOS() && ionic.Platform.version() >= 7.0 ) ||
+  return ( ionic.Platform.isIOS() && ionic.Platform.version() < 7.0 ) ||
          ( !ionic.Platform.isWebView() && ionic.Platform.isAndroid() );
 }
 
