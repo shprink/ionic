@@ -24,11 +24,24 @@
       textarea.cloned-text-input {
         background: red !important;
       }
+
+      body {
+        background: purple;
+      }
+      .pane {
+        background: maroon;
+      }
+      .scroll-content {
+        background: pink;
+      }
+      .scroll {
+        background: lightgreen;
+      }
     </style>
   </head>
   <body ng-controller="AppCtrl">
 
-    <div id="logs" style="position:fixed; top:0; left:0; z-index:9999; background: #eee; font-size:8px; line-height:10px; display:none; "></div>
+    <div id="logs" style="position:fixed; top:0; left:0; z-index:9999; background: #eee; font-size:8px; line-height:10px; display:block; "></div>
 
     <ion-view id="view">
       <header>

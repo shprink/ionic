@@ -55,7 +55,7 @@ describe('Ionic Keyboard', function() {
     expect( keyboardIsOverWebView() ).toEqual(true);
   });
 
-  it('Should keyboardIsOverWebView()=false if iOS 7.0 or greater', function(){
+  xit('Should keyboardIsOverWebView()=false if iOS 7.0 or greater', function(){
     ionic.Platform.setPlatform('iOS');
     ionic.Platform.setVersion('7.0');
     expect( ionic.Platform.isAndroid() ).toEqual(false);
@@ -91,9 +91,9 @@ describe('Ionic Keyboard', function() {
   });
 
   it('keyboardGetHeight() should = difference in window height before and after keyboard show if view resizes', function(){
-    keyboardDeviceHeight = 460;
+    keyboardViewportHeight = 460;
     window.innerHeight = 260;
-    expect( keyboardGetHeight() ).toEqual(200); 
+    expect( keyboardGetHeight() ).toEqual(200);
   });
 
   it('keyboardGetHeight() should = cordova.plugins.Keyboard.height if plugin exists', function(){
@@ -101,22 +101,22 @@ describe('Ionic Keyboard', function() {
     expect( keyboardGetHeight() ).toEqual(200);
   });
 
-  it('keyboardUpdateDeviceHeight() should update when ionic.keyboard.isOpen() is false', function(){
+  it('keyboardUpdateViewportHeight() should update when ionic.keyboard.isOpen() is false', function(){
     ionic.keyboard.isOpen = false;
     window.innerHeight = 460;
-    keyboardDeviceHeight = 320;
-    keyboardUpdateDeviceHeight();
+    keyboardViewportHeight = 320;
+    keyboardUpdateViewportHeight();
 
-    expect( keyboardDeviceHeight ).toEqual(460);
+    expect( keyboardViewportHeight ).toEqual(460);
   });
 
-  it('keyboardUpdateDeviceHeight() should not update when ionic.keyboard.isOpen() is true', function(){
+  it('keyboardUpdateViewportHeight() should not update when ionic.keyboard.isOpen() is true', function(){
     ionic.keyboard.isOpen = true;
     window.innerHeight = 100;
-    keyboardDeviceHeight = 320;
-    keyboardUpdateDeviceHeight();
+    keyboardViewportHeight = 320;
+    keyboardUpdateViewportHeight();
 
-    expect( keyboardDeviceHeight ).toEqual(320);
+    expect( keyboardViewportHeight ).toEqual(320);
   });
 
 });
