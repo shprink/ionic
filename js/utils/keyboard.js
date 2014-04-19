@@ -7,6 +7,7 @@ IONIC KEYBOARD
 
 var keyboardViewportHeight;
 var keyboardIsOpen;
+var keyboardActiveElement;
 
 var DEFAULT_KEYBOARD_HEIGHT = 260;
 var KEYBOARD_OPEN_CSS = 'keyboard-open'
@@ -131,7 +132,10 @@ function keyboardShow(element, elementTop, elementBottom, viewportHeight, keyboa
 
   // send event so the scroll view adjusts
   if(details.isElementUnderKeyboard) {
+    keyboardActiveElement = element;
     ionic.trigger('scrollChildIntoView', details, true);
+  } else {
+    keyboardActiveElement = null;
   }
 
   ionic.keyboard.alreadyOpen = true;
@@ -145,8 +149,9 @@ function keyboardShow(element, elementTop, elementBottom, viewportHeight, keyboa
 }
 
 function keyboardHide() {
+  console.debug('keyboardHide')
   ionic.trigger('resetScrollView', {
-    target: tapActiveElement()
+    target: keyboardActiveElement
   }, true);
 
   ionic.requestAnimationFrame(function(){

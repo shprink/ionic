@@ -661,6 +661,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
 
     container.addEventListener('resetScrollView', function(e) {
       //return scrollview to original height once keyboard has hidden
+      console.debug('resetScrollView')
       container.style.height = "";
       container.style.overflow = "";
       self.resize();
