@@ -86,5 +86,39 @@ describe('Ionic Keyboard', function() {
     expect( keyboardHasPlugin() ).toEqual(true);
   });
 
+  it('keyboardGetHeight() should = DEFAULT_KEYBOARD_HEIGHT if no plugin or resized view', function(){
+    expect( keyboardGetHeight() ).toEqual(260);
+  });
+
+  it('keyboardGetHeight() should = difference in window height before and after keyboard show if view resizes', function(){
+    keyboardDeviceHeight = 460;
+    window.innerHeight = 260;
+    expect( keyboardGetHeight() ).toEqual(200); 
+  });
+
+  it('keyboardGetHeight() should = cordova.plugins.Keyboard.height if plugin exists', function(){
+    cordova = { plugins: { Keyboard: { height: 200 } } };
+    expect( keyboardGetHeight() ).toEqual(200);
+  });
+
+  it('keyboardUpdateDeviceHeight() should update when ionic.keyboard.isOpen() is false', function(){
+    ionic.keyboard.isOpen(false);
+    window.innerHeight = 460;
+    keyboardDeviceHeight = 320;
+    keyboardUpdateDeviceHeight();
+
+    expect( keyboardDeviceHeight ).toEqual(460);
+  });
+
+  it('keyboardUpdateDeviceHeight() should not update when ionic.keyboard.isOpen() is true', function(){
+    ionic.keyboard.isOpen(true);
+    window.innerHeight = 100;
+    keyboardDeviceHeight = 320;
+    keyboardUpdateDeviceHeight();
+
+    expect( keyboardDeviceHeight ).toEqual(320);
+  });
+
+
 
 });
