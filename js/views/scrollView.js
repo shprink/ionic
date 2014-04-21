@@ -621,16 +621,29 @@ ionic.views.Scroll = ionic.views.View.inherit({
 
     //Broadcasted when keyboard is shown on some platforms.
     //See js/utils/keyboard.js
+    container.addEventListener('scrollKeyboardAdjust', function(e) {
+      console.debug('scrollKeyboardAdjust, keyboardHeight', e.detail.keyboardHeight)
+
+      //shrink scrollview so we can actually scroll if the input is hidden
+      //if it isn't shrink so we can scroll to inputs under the keyboard
+      container.style.height = (container.clientHeight - e.detail.keyboardHeight) + "px";
+      container.style.overflow = "visible";
+
+      //update scroll view
+      self.resize();
+    });
+
+
     container.addEventListener('scrollChildIntoView', function(e) {
       var keyboardHeight = e.detail.keyboardHeight || 0;
       var keyboardTopOffset = e.detail.keyboardTopOffset || 0;
 
-      if(e.detail.doResize){
-        //shrink scrollview so we can actually scroll if the input is hidden
-        //if it isn't shrink so we can scroll to inputs under the keyboard
+      if( !self.isScrolledIntoView ) {
+        // shrink scrollview so we can actually scroll if the input is hidden
+        // if it isn't shrink so we can scroll to inputs under the keyboard
         container.style.height = (container.clientHeight - keyboardHeight) + "px";
         container.style.overflow = "visible";
-
+        self.isScrolledIntoView = true;
         //update scroll view
         self.resize();
       }
@@ -640,15 +653,17 @@ ionic.views.Scroll = ionic.views.View.inherit({
         //Put element in middle of visible screen
         //Wait for resize() to reset scroll position
         setTimeout(function(){
-          //middle of the scrollview, where we want to scroll to
+          //middle of the scrollview, where we want to scroll to)
           var scrollViewMidpointOffset = container.clientHeight * 0.5;
-          var scrollOffset = keyboardTopOffset + scrollViewMidpointOffset;
-          self.scrollBy(0, scrollOffset, true);
+          var scrollTop = keyboardTopOffset + scrollViewMidpointOffset;
+          console.debug('scrollChildIntoView scrollTop', scrollTop)
+          self.scrollBy(0, scrollTop, true);
 
           //please someone tell me there's a better way to do this
           //wait until input is scrolled into view, then fix focus
           setTimeout(function(){
-            e.target.value = e.target.value; //thanks @adambradley 1337h4x
+            e.target.value = e.target.value = 'scrolled to'; //thanks @adambradley 1337h4x
+            document.body.style.padding = '0'
           }, 600);
 
         }, 32);
@@ -662,6 +677,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
     container.addEventListener('resetScrollView', function(e) {
       //return scrollview to original height once keyboard has hidden
       console.debug('resetScrollView')
+      self.isScrolledIntoView = false;
       container.style.height = "";
       container.style.overflow = "";
       self.resize();

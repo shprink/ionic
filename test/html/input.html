@@ -2,7 +2,7 @@
   <head>
     <meta charset="utf-8">
     <title>Inputs</title>
-    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width, height=device-height">
     <link rel="stylesheet" href="../../dist/css/ionic.css">
     <style>
       input,
@@ -36,15 +36,27 @@
       }
       .scroll-content {
         background: pink;
+        overflow: hidden !important;
       }
       .scroll {
         background: lightgreen;
       }
+
+      input,
+      textarea {
+        border: 1px solid blue !important;
+      }
+
+      html, body {
+        height: 100% !important;
+        overflow: hidden !important;
+      }
+
     </style>
   </head>
   <body ng-controller="AppCtrl">
 
-    <div id="logs" style="position:fixed; top:0; left:0; z-index:9999; background: #eee; font-size:8px; line-height:10px; display:block; "></div>
+    <div id="logs" style="position:fixed; top:0; left:0; z-index:9999; background: #eee; font-size:8px; line-height:10px; display:none; "></div>
 
     <ion-view id="view">
       <header>
