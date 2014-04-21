@@ -299,10 +299,6 @@ function tapTouchEnd(e) {
 }
 
 function tapTouchMove(e) {
-  if( ionic.keyboard.isOpen ) {
-    e.preventDefault();
-    return false;
-  }
   if( tapHasPointerMoved(e) ) {
     tapPointerMoved = true;
     tapEventListener('touchmove', false);

@@ -662,8 +662,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
           //please someone tell me there's a better way to do this
           //wait until input is scrolled into view, then fix focus
           setTimeout(function(){
-            e.target.value = e.target.value = 'scrolled to'; //thanks @adambradley 1337h4x
-            document.body.style.padding = '0'
+            e.target.value = e.target.value;
           }, 600);
 
         }, 32);
