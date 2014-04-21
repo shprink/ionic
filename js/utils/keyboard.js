@@ -25,10 +25,9 @@ function keyboardInit() {
 
   if( keyboardHasPlugin() ) {
     window.addEventListener('native.showkeyboard', keyboardNativeShow);
-  } else {
-    window.addEventListener('ionic.focusin', keyboardBrowserFocusIn);
-    window.addEventListener('focusin', keyboardBrowserFocusIn);
-  }
+  } 
+  window.addEventListener('ionic.focusin', keyboardBrowserFocusIn);
+  window.addEventListener('focusin', keyboardBrowserFocusIn);
 
   window.addEventListener('focusout', keyboardFocusOut);
   window.addEventListener('orientationchange', keyboardUpdateViewportHeight);
@@ -38,24 +37,27 @@ function keyboardInit() {
 
 function keyboardNativeShow(e) {
   ionic.keyboard.height = e.keyboardHeight;
-  document.body.scrollTop = 0;
-  keyboardSetShow(e);
+  keyboardSetShow(keyboardActiveElement);
 }
 
 function keyboardBrowserFocusIn(e) {
   if( !e.target || !ionic.tap.isTextInput(e.target) || !keyboardIsWithinScroll(e.target) ) return;
   document.body.scrollTop = 0;
-  clearTimeout(keyboardFocusInTimer);
-  keyboardFocusInTimer = setTimeout(function(){
-    keyboardSetShow(e);
-  }, 32);
+  keyboardActiveElement = e.target;
+
+  if ( !keyboardHasPlugin() ) {
+    clearTimeout(keyboardFocusInTimer);
+    keyboardFocusInTimer = setTimeout(function(){
+      keyboardSetShow(keyboardActiveElement);
+    }, 32);
+  }
 }
 
-function keyboardSetShow(e) {
+function keyboardSetShow(element) {
   var keyboardHeight = keyboardGetHeight();
-  var elementBounds = e.target.getBoundingClientRect();
+  var elementBounds = element.getBoundingClientRect();
 
-  keyboardShow(e.target, elementBounds.top, elementBounds.bottom, keyboardViewportHeight, keyboardHeight);
+  keyboardShow(element, elementBounds.top, elementBounds.bottom, keyboardViewportHeight, keyboardHeight);
 }
 
 function keyboardShow(element, elementTop, elementBottom, viewportHeight, keyboardHeight) {
@@ -66,10 +68,10 @@ function keyboardShow(element, elementTop, elementBottom, viewportHeight, keyboa
     keyboardHeight: keyboardHeight
   }
 
-  if( window.innerHeight < keyboardViewportHeight ) {
+  if( window.innerHeight < viewportHeight ) {
     // view's height was shrunk down and the keyboard takes up the space the view doesn't fill
     // do not add extra padding at the bottom of the scroll view, native already did that
-    details.contentHeight = viewportHeight;
+    details.contentHeight = window.innerHeight;
   } else {
     // keyboard sits on top of the view, but doesn't adjust the view's height
     // lower the content height by subtracting the keyboard height from the view height
