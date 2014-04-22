@@ -28,7 +28,7 @@ function keyboardInit() {
   window.addEventListener('focusin', keyboardBrowserFocusIn);
 
   window.addEventListener('focusout', keyboardFocusOut);
-  window.addEventListener('orientationchange', keyboardUpdateViewportHeight);
+  window.addEventListener('orientationchange', keyboardOrientationChange);
 
   document.removeEventListener('touchstart', keyboardInit);
 }
@@ -140,6 +140,13 @@ function keyboardUpdateViewportHeight() {
   if( window.innerHeight > keyboardViewportHeight ) {
     keyboardViewportHeight = window.innerHeight;
   }
+}
+
+function keyboardOrientationChange() {
+  keyboardViewportHeight = window.innerHeight;
+  setTimeout(function(){
+    keyboardViewportHeight = window.innerHeight;
+  }, 1000);
 }
 
 function keyboardGetHeight() {
