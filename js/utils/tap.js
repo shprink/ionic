@@ -110,7 +110,6 @@ ionic.tap = {
   cloneFocusedInput: function(container, scrollIntance) {
     if(ionic.tap.hasCheckedClone) return;
     ionic.tap.hasCheckedClone = true;
-    scrollIntance.hasClonedInput = false;
 
     ionic.requestAnimationFrame(function(){
       var focusInput = container.querySelector(':focus');
@@ -125,7 +124,6 @@ ionic.tap = {
           focusInput.parentElement.insertBefore(clonedInput, focusInput);
           focusInput.style.top = focusInput.offsetTop;
           focusInput.classList.add('previous-input-focus');
-          scrollIntance.hasClonedInput = true;
         }
       }
     });
@@ -135,11 +133,6 @@ ionic.tap = {
 
   removeClonedInputs: function(container, scrollIntance) {
     ionic.tap.hasCheckedClone = false;
-
-    // no need to remove clones if one was never created
-    if(!scrollIntance.hasClonedInput) return;
-
-    scrollIntance.hasClonedInput = false;
 
     ionic.requestAnimationFrame(function(){
       var clonedInputs = container.querySelectorAll('.cloned-text-input');

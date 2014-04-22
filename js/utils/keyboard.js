@@ -5,14 +5,14 @@ IONIC KEYBOARD
 
 */
 
-var keyboardViewportHeight;
+var keyboardViewportHeight = window.innerHeight;
 var keyboardIsOpen;
 var keyboardActiveElement;
 var keyboardResetTimer;
 var keyboardFocusInTimer;
 
 var DEFAULT_KEYBOARD_HEIGHT = 275;
-var KEYBOARD_OPEN_CSS = 'keyboard-open'
+var KEYBOARD_OPEN_CSS = 'keyboard-open';
 var SCROLL_CONTAINER_CSS = 'scroll';
 
 ionic.keyboard = {
@@ -21,11 +21,9 @@ ionic.keyboard = {
 };
 
 function keyboardInit() {
-  keyboardUpdateViewportHeight();
-
   if( keyboardHasPlugin() ) {
     window.addEventListener('native.showkeyboard', keyboardNativeShow);
-  } 
+  }
   window.addEventListener('ionic.focusin', keyboardBrowserFocusIn);
   window.addEventListener('focusin', keyboardBrowserFocusIn);
 
@@ -66,7 +64,10 @@ function keyboardShow(element, elementTop, elementBottom, viewportHeight, keyboa
     elementTop: elementTop,
     elementBottom: elementBottom,
     keyboardHeight: keyboardHeight
-  }
+  };
+
+  console.debug('innerHeight', window.innerHeight);
+  console.debug('viewportHeight', viewportHeight);
 
   if( window.innerHeight < viewportHeight ) {
     // view's height was shrunk down and the keyboard takes up the space the view doesn't fill
@@ -81,7 +82,7 @@ function keyboardShow(element, elementTop, elementBottom, viewportHeight, keyboa
   console.debug('keyboardShow', keyboardHeight, details.contentHeight);
 
   // distance from top of input to the top of the keyboard
-  details.keyboardTopOffset = (details.elementTop - details.contentHeight);
+  details.keyboardTopOffset = Math.round(details.elementTop - details.contentHeight);
 
   console.debug('keyboardTopOffset', details.elementTop, details.contentHeight, details.keyboardTopOffset);
 
@@ -117,12 +118,12 @@ function keyboardFocusOut(e) {
     // once keyboard closes to get the proper value
     keyboardUpdateViewportHeight();
 
-    ionic.keyboard.IsOpen = false;
-  }, 600);
+    ionic.keyboard.isOpen = false;
+  }, 400);
 }
 
 function keyboardHide() {
-  console.debug('keyboardHide')
+  console.debug('keyboardHide');
   ionic.trigger('resetScrollView', {
     target: keyboardActiveElement
   }, true);
@@ -135,8 +136,10 @@ function keyboardHide() {
   document.removeEventListener('touchmove', keyboardDisableNativeScroll);
 }
 
-function keyboardUpdateViewportHeight(e) {
-  if ( !ionic.keyboard.isOpen ) keyboardViewportHeight = window.innerHeight;
+function keyboardUpdateViewportHeight() {
+  if( window.innerHeight > keyboardViewportHeight ) {
+    keyboardViewportHeight = window.innerHeight;
+  }
 }
 
 function keyboardGetHeight() {
@@ -189,6 +192,11 @@ function keyboardHasPlugin() {
 }
 
 ionic.Platform.ready(function() {
+  keyboardUpdateViewportHeight();
+
+  // Android sometimes reports bad innerHeight on window.load
+  // try it again in a lil bit to play it safe
+  setTimeout(keyboardUpdateViewportHeight, 1000);
 
   // only initialize the adjustments for the virtual keyboard
   // if a touchstart event happens

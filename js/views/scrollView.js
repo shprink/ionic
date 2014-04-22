@@ -643,7 +643,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
           //middle of the scrollview, where we want to scroll to)
           var scrollViewMidpointOffset = container.clientHeight * 0.5;
           var scrollTop = keyboardTopOffset + scrollViewMidpointOffset;
-          console.debug('scrollChildIntoView scrollTop', scrollTop);
+          console.debug('scrollChildIntoView', scrollTop);
           ionic.tap.cloneFocusedInput(container, self);
           self.scrollBy(0, scrollTop, true);
         }, 32);
