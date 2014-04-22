@@ -621,19 +621,6 @@ ionic.views.Scroll = ionic.views.View.inherit({
 
     //Broadcasted when keyboard is shown on some platforms.
     //See js/utils/keyboard.js
-    container.addEventListener('scrollKeyboardAdjust', function(e) {
-      console.debug('scrollKeyboardAdjust, keyboardHeight', e.detail.keyboardHeight)
-
-      //shrink scrollview so we can actually scroll if the input is hidden
-      //if it isn't shrink so we can scroll to inputs under the keyboard
-      container.style.height = (container.clientHeight - e.detail.keyboardHeight) + "px";
-      container.style.overflow = "visible";
-
-      //update scroll view
-      self.resize();
-    });
-
-
     container.addEventListener('scrollChildIntoView', function(e) {
       var keyboardHeight = e.detail.keyboardHeight || 0;
       var keyboardTopOffset = e.detail.keyboardTopOffset || 0;
@@ -656,15 +643,9 @@ ionic.views.Scroll = ionic.views.View.inherit({
           //middle of the scrollview, where we want to scroll to)
           var scrollViewMidpointOffset = container.clientHeight * 0.5;
           var scrollTop = keyboardTopOffset + scrollViewMidpointOffset;
-          console.debug('scrollChildIntoView scrollTop', scrollTop)
+          console.debug('scrollChildIntoView scrollTop', scrollTop);
+          ionic.tap.cloneFocusedInput(container, self);
           self.scrollBy(0, scrollTop, true);
-
-          //please someone tell me there's a better way to do this
-          //wait until input is scrolled into view, then fix focus
-          setTimeout(function(){
-            e.target.value = e.target.value;
-          }, 600);
-
         }, 32);
       }
 
@@ -735,7 +716,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
           // disabled being able to select text on an input
           // hide the input which has focus, and show a cloned one that doesn't have focus
           self.__isSelectable = false;
-          ionic.tap.cloneFocusedInput(self.__container);
+          ionic.tap.cloneFocusedInput(container, self);
         }
       }
 
@@ -749,13 +730,13 @@ ionic.views.Scroll = ionic.views.View.inherit({
       self.__enableScrollY = true;
 
       if( !self.__isDragging && !self.__isDecelerating && !self.__isAnimating ) {
-        ionic.tap.removeClonedInputs(self.__container);
+        ionic.tap.removeClonedInputs(container, self);
       }
     };
 
     self.options.orgScrollingComplete = self.options.scrollingComplete;
     self.options.scrollingComplete = function() {
-      ionic.tap.removeClonedInputs(self.__container);
+      ionic.tap.removeClonedInputs(container, self);
       self.options.orgScrollingComplete();
     };
 

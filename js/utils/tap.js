@@ -107,9 +107,10 @@ ionic.tap = {
     return ionic.tap.isTextInput(ele) || ionic.tap.isLabelWithTextInput(ele);
   },
 
-  cloneFocusedInput: function(container, instance) {
+  cloneFocusedInput: function(container, scrollIntance) {
     if(ionic.tap.hasCheckedClone) return;
     ionic.tap.hasCheckedClone = true;
+    scrollIntance.hasClonedInput = false;
 
     ionic.requestAnimationFrame(function(){
       var focusInput = container.querySelector(':focus');
@@ -120,9 +121,11 @@ ionic.tap = {
           clonedInput.type = focusInput.type;
           clonedInput.value = focusInput.value;
           clonedInput.className = 'cloned-text-input';
+          clonedInput.readOnly = true;
           focusInput.parentElement.insertBefore(clonedInput, focusInput);
           focusInput.style.top = focusInput.offsetTop;
           focusInput.classList.add('previous-input-focus');
+          scrollIntance.hasClonedInput = true;
         }
       }
     });
@@ -130,8 +133,13 @@ ionic.tap = {
 
   hasCheckedClone: false,
 
-  removeClonedInputs: function(container) {
+  removeClonedInputs: function(container, scrollIntance) {
     ionic.tap.hasCheckedClone = false;
+
+    // no need to remove clones if one was never created
+    if(!scrollIntance.hasClonedInput) return;
+
+    scrollIntance.hasClonedInput = false;
 
     ionic.requestAnimationFrame(function(){
       var clonedInputs = container.querySelectorAll('.cloned-text-input');

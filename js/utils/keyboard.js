@@ -118,7 +118,7 @@ function keyboardFocusOut(e) {
     keyboardUpdateViewportHeight();
 
     ionic.keyboard.IsOpen = false;
-  }, 1000);
+  }, 600);
 }
 
 function keyboardHide() {
