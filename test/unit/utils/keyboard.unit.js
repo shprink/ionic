@@ -12,11 +12,12 @@ Physical Device Testing Scenarios
 - focusing an input that is above the keyboard while another input already has focus should not do anything
 - focusing an input that is below the keyboard while another input already has focus should scroll it into view
 - the header should not move when an input is focused
-- focusing inputs at the bottom of the page should scroll into view normally (broken on iOS 7.0 w/o height meta tag)
 - entering an input on a popup or modal should resize and un-resize that scrollview
 - opening a popup or a modal while the keyboard is up should un-resize the scrollview before opening the modal or popup
 - changing the orientation of the device should not break any of the above^
-- on iOS, shrinking the view should account for the button-bar at the bottom (currently not working)
+
+- focusing inputs at the bottom of the page should scroll into view normally (broken on iOS 7.0 w/o height meta tag)
+- on iOS in safari, shrinking the view should account for the button-bar at the bottom (currently not working)
 
 Tentative:
 - height=device-height not needed on iOS 6.1
