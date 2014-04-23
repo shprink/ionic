@@ -16,6 +16,7 @@ Physical Device Testing Scenarios
 - entering an input on a popup or modal should resize and un-resize that scrollview
 - opening a popup or a modal while the keyboard is up should un-resize the scrollview before opening the modal or popup
 - changing the orientation of the device should not break any of the above^
+- on iOS, shrinking the view should account for the button-bar at the bottom (currently not working)
 
 Tentative:
 - height=device-height not needed on iOS 6.1
