@@ -120,7 +120,7 @@ describe('Ionic Keyboard', function() {
   });
 
   it('keyboardGetHeight() should = DEFAULT_KEYBOARD_HEIGHT if no plugin or resized view', function(){
-    expect( keyboardGetHeight() ).toEqual(260);
+    expect( keyboardGetHeight() ).toEqual(275);
   });
 
   it('keyboardGetHeight() should = difference in window height before and after keyboard show if view resizes', function(){
@@ -150,6 +150,56 @@ describe('Ionic Keyboard', function() {
     keyboardUpdateViewportHeight();
 
     expect( keyboardViewportHeight ).toEqual(320);
+  });
+
+  it('Should scroll input into view if it is under the keyboard', function(){
+    var element = document.createElement('textarea');
+    var elementTop = 300;
+    var elementBottom = 400;
+    var keyboardHeight = 200;
+    window.innerHeight = 500;
+    var deviceHeight = 500;
+    var details = keyboardShow(element, elementTop, elementBottom, deviceHeight, keyboardHeight);
+
+    expect( details.isElementUnderKeyboard ).toEqual(true);
+  });
+
+  it('Should not scroll input into view if it is not under the keyboard', function(){
+    var element = document.createElement('textarea');
+    var elementTop = 100;
+    var elementBottom = 200;
+    var keyboardHeight = 200;
+    window.innerHeight = 500;
+    var deviceHeight = 500;
+    var details = keyboardShow(element, elementTop, elementBottom, deviceHeight, keyboardHeight);
+
+    expect( details.isElementUnderKeyboard ).toEqual(false);
+  });
+
+  it('Should not subtract the keyboard height from the contentHeight if window.innerHeight < viewportHeight', function(){
+    var element = document.createElement('textarea');
+    var elementTop = 300;
+    var elementBottom = 400;
+    var keyboardHeight = 200;
+
+    var deviceHeight = 460;
+    window.innerHeight = 260;
+    var details = keyboardShow(element, elementTop, elementBottom, deviceHeight, keyboardHeight);
+
+    expect( details.contentHeight ).toEqual(260);
+  });
+
+  it('Should subtract the keyboard height from the contentHeight if window.innerHeight >= viewportHeight', function(){
+    var element = document.createElement('textarea');
+    var elementTop = 300;
+    var elementBottom = 400;
+    var keyboardHeight = 200;
+
+    var deviceHeight = 568;
+    window.innerHeight = 568;
+    var details = keyboardShow(element, elementTop, elementBottom, deviceHeight, keyboardHeight);
+
+    expect( details.contentHeight ).toEqual(368);
   });
 
 });
