@@ -3,6 +3,26 @@
 
 Physical Device Testing Scenarios
 ---------------------------------
+- focusing inputs below the keyboard should scroll them into the middle of the view
+- focusing inputs that are above the keyboard should not do anything
+- focusing inputs should resize the scroll view so the user can scroll to inputs at the bottom of the page
+- clicking the label of an input should focus that input
+- focusing an input that is mostly offscreen should scroll into view using js scrolling, not the browser scrolling it into view
+- focusing an input while another input already has focus should not (visibly) close and re-open the keyboard
+- focusing an input that is above the keyboard while another input already has focus should not do anything
+- focusing an input that is below the keyboard while another input already has focus should scroll it into view
+- the header should not move when an input is focused
+- focusing inputs at the bottom of the page should scroll into view normally (broken on iOS 7.0 w/o height meta tag)
+- entering an input on a popup or modal should resize and un-resize that scrollview
+- opening a popup or a modal while the keyboard is up should un-resize the scrollview before opening the modal or popup
+- changing the orientation of the device should not break any of the above^
+
+Tentative:
+- height=device-height not needed on iOS 6.1
+- height=device-height needed on iOS 7.0 Cordova
+  ** without it, fires 4 resize events when the keyboard comes up, and the scroll view resizes incorrectly, with it, does not fire resize events? **
+- height=device-height not needed on iOS 7.1
+
 
 
 Notes:
