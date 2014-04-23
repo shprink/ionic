@@ -35,27 +35,24 @@ function keyboardInit() {
 
 function keyboardNativeShow(e) {
   ionic.keyboard.height = e.keyboardHeight;
-  keyboardSetShow(keyboardActiveElement);
 }
 
 function keyboardBrowserFocusIn(e) {
   if( !e.target || !ionic.tap.isTextInput(e.target) || !keyboardIsWithinScroll(e.target) ) return;
   document.body.scrollTop = 0;
-  keyboardActiveElement = e.target;
+  document.querySelector('.scroll-content').scrollTop = 0;
 
-  if ( !keyboardHasPlugin() ) {
-    clearTimeout(keyboardFocusInTimer);
-    keyboardFocusInTimer = setTimeout(function(){
-      keyboardSetShow(keyboardActiveElement);
-    }, 32);
-  }
+  clearTimeout(keyboardFocusInTimer);
+  keyboardFocusInTimer = setTimeout(function(){
+    keyboardSetShow(e);
+  }, 32);
 }
 
-function keyboardSetShow(element) {
+function keyboardSetShow(e) {
   var keyboardHeight = keyboardGetHeight();
-  var elementBounds = element.getBoundingClientRect();
+  var elementBounds = e.target.getBoundingClientRect();
 
-  keyboardShow(element, elementBounds.top, elementBounds.bottom, keyboardViewportHeight, keyboardHeight);
+  keyboardShow(e.target, elementBounds.top, elementBounds.bottom, keyboardViewportHeight, keyboardHeight);
 }
 
 function keyboardShow(element, elementTop, elementBottom, viewportHeight, keyboardHeight) {
