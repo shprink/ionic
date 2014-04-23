@@ -26,16 +26,17 @@ Tentative:
 
 Tested On
 -----------------------
-- iOS 6.1 Safari
-- iOS 6.1 Cordova
-- iOS 7.0 Safari
-- iOS 7.0 Cordova
 - iOS 7.1 Safari
 - iOS 7.1 Cordova
-- Android 4.2 Browser
-- Android 4.2 Corodva
+- iOS 7.0 Safari
+- iOS 7.0 Cordova
+- iOS 6.1 Safari
+- iOS 6.1 Cordova
 - Android 4.4 Browser
-- Android 4.4 Corodva
+- Android 4.4 Cordova
+- Android 4.2 Browser
+- Android 4.2 Cordova
+
 
 
 Notes:
